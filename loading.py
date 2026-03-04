@@ -3,18 +3,15 @@ import json
 from datetime import datetime
 from models import Base, engine, session, Staff, Patient, Surgery, Prescription, Shift
 
-# ---------------------------
-# Drop and recreate all tables
-# ---------------------------
+
 print("Dropping all existing tables...")
 Base.metadata.drop_all(engine)
 print("Recreating tables...")
 Base.metadata.create_all(engine)
 print("All tables recreated.")
 
-# ---------------------------
-# Helper function to map patient fields
-# ---------------------------
+
+#patient
 def map_patient_fields(data):
     mapped = []
     for patient in data:
@@ -45,9 +42,8 @@ def map_patient_fields(data):
         mapped.append(p)
     return mapped
 
-# ---------------------------
-# Helper function to map surgery fields
-# ---------------------------
+
+# surgery fields
 def map_surgery_fields(data):
     mapped = []
     for s in data:
@@ -78,9 +74,8 @@ def map_surgery_fields(data):
         mapped.append(surgery)
     return mapped
 
-# ---------------------------
-# Generic JSON loader
-# ---------------------------
+
+# JSON loader
 def load_json(file_path, Model, mapper=None):
     with open(file_path, "r") as f:
         data = json.load(f)
@@ -96,9 +91,8 @@ def load_json(file_path, Model, mapper=None):
     session.commit()
     print(f"Loaded {file_path}")
 
-# ---------------------------
-# Load all JSON files
-# ---------------------------
+
+# loading JSON files
 print("Loading staff...")
 load_json("nosql/staff.json", Staff)
 
