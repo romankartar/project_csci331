@@ -1,6 +1,9 @@
 from sqlalchemy import create_engine, Column, String, Integer, Date, Boolean, JSON
 from sqlalchemy.orm import declarative_base, sessionmaker
 
+engine = create_engine("sqlite:///hospital.db")
+Session = sessionmaker(bind=engine)
+db_session = Session()
 Base = declarative_base()
 
 # -------------------

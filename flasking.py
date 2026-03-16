@@ -1,21 +1,196 @@
-from flask import Flask, render_template, request
-from models import Patient, session
-from datetime import datetime
+from flask import Flask, render_template, request, redirect, session
+from models import Staff, Patient, db_session  # Ensure Patient is imported
 
 app = Flask(__name__)
+app.secret_key = "supersecretkey"  # Required for session
 
+# -------------------------
+# LOGIN PAGE
+# -------------------------
 @app.route("/", methods=["GET", "POST"])
-def search_patient():
-    patient = None
-    
+def login():
+    error = None
     if request.method == "POST":
-        dob_input = request.form.get("dob")
-        
-        if dob_input:
-            dob = datetime.strptime(dob_input, "%Y-%m-%d").date()
-            patient = session.query(Patient).filter_by(dob=dob).first()
-    
-    return render_template("index.html", patient=patient)
+        staff_id = request.form.get("staffID")
+        password = request.form.get("password")
+
+        staff = db_session.query(Staff).filter_by(staffID=staff_id).first()
+
+        if staff and staff.password == password:
+            session["staffID"] = staff.staffID
+            return redirect("/home")
+        else:
+            error = "Invalid Staff ID or Password"
+
+    return render_template("index.html", error=error)
+
+
+# -------------------------
+# HOME PAGE
+# -------------------------
+@app.route("/home")
+def home():
+    if "staffID" not in session:
+        return redirect("/")
+    return render_template("home.html")
+
+
+# -------------------------
+# PATIENT MANAGEMENT
+# -------------------------
+def next_patient_id():
+    last_patient = db_session.query(Patient).order_by(Patient.patientID.desc()).first()
+    if last_patient:
+        num = int(last_patient.patientID[1:]) + 1
+    else:
+        num = 1
+    return f"P{num:09d}"
+
+
+@app.route("/patients", methods=["GET", "POST"])
+def patients():
+    if "staffID" not in session:
+        return redirect("/")
+
+    action = request.form.get("action")
+    patientID = request.form.get("patientID")
+
+    # ---------- BUTTON ACTIONS ----------
+    if request.method == "POST":
+        if action == "add":
+            return render_template("patients.html", show_add_form=True)
+        elif action == "lookup":
+            if patientID:
+                patient = db_session.query(Patient).filter_by(patientID=patientID).first()
+                if patient:
+                    return render_template("patients.html", patient=patient)
+                else:
+                    return render_template("patients.html", message="No patient found with that ID.")
+            else:
+                return render_template("patients.html", show_lookup_form=True)
+        elif action == "update":
+            if patientID:
+                patient = db_session.query(Patient).filter_by(patientID=patientID).first()
+                if patient:
+                    return render_template("patients.html", show_update_form=True, patient=patient)
+                else:
+                    return render_template("patients.html", message="Patient not found.")
+            else:
+                return render_template("patients.html", show_lookup_form=True, update_mode=True)
+        elif action == "remove":
+            if patientID:
+                patient = db_session.query(Patient).filter_by(patientID=patientID).first()
+                if patient:
+                    return render_template("patients.html", show_remove_confirm=True, patient=patient)
+                else:
+                    return render_template("patients.html", message="Patient not found.")
+            else:
+                return render_template("patients.html", show_lookup_form=True, remove_mode=True)
+
+    return render_template("patients.html")
+
+
+# ---------- CRUD OPERATIONS ----------
+@app.route("/add-patient", methods=["POST"])
+def add_patient():
+    data = request.form
+    required_fields = ["name", "dob", "age", "gender", "phone", "address"]
+    for field in required_fields:
+        if not data.get(field):
+            return render_template("patients.html", show_add_form=True,
+                                   message=f"Retry: {field} cannot be empty.")
+
+    new_patient = Patient(
+        patientID=next_patient_id(),
+        name=data["name"],
+        dob=data["dob"],
+        age=int(data["age"]),
+        gender=data["gender"],
+        phone=data["phone"],
+        address=data["address"],
+        allergies=data.get("allergies", ""),
+        conditions=data.get("conditions", ""),
+        primary_physician_id="ST0001"
+    )
+    db_session.add(new_patient)
+    db_session.commit()
+    return render_template("patients.html", patient=new_patient, message="Patient added successfully.")
+
+
+@app.route("/update-patient", methods=["POST"])
+def update_patient():
+    pid = request.form.get("patientID")
+    patient = db_session.query(Patient).filter_by(patientID=pid).first()
+    if not patient:
+        return render_template("patients.html", message="Patient not found.")
+
+    data = request.form
+    required_fields = ["name", "dob", "age", "gender", "phone", "address"]
+    for field in required_fields:
+        if not data.get(field):
+            return render_template("patients.html", show_update_form=True, patient=patient,
+                                   message=f"Retry: {field} cannot be empty.")
+
+    patient.name = data["name"]
+    patient.dob = data["dob"]
+    patient.age = int(data["age"])
+    patient.gender = data["gender"]
+    patient.phone = data["phone"]
+    patient.address = data["address"]
+    patient.allergies = data.get("allergies", "")
+    patient.conditions = data.get("conditions", "")
+    db_session.commit()
+
+    return render_template("patients.html", patient=patient, message="Patient updated successfully.")
+
+
+@app.route("/remove-patient", methods=["POST"])
+def remove_patient():
+    pid = request.form.get("patientID")
+    confirm = request.form.get("confirm")
+    patient = db_session.query(Patient).filter_by(patientID=pid).first()
+
+    if confirm == "yes" and patient:
+        db_session.delete(patient)
+        db_session.commit()
+        return render_template("patients.html", message="Patient deleted successfully.")
+    elif confirm == "no":
+        return render_template("patients.html", message="Deletion canceled.")
+    else:
+        return render_template("patients.html", show_remove_confirm=True, patient=patient)
+
+
+# -------------------------
+# OTHER PAGES
+# -------------------------
+@app.route("/surgeries")
+def surgeries():
+    if "staffID" not in session:
+        return redirect("/")
+    return render_template("surgeries.html")
+
+
+@app.route("/prescriptions")
+def prescriptions():
+    if "staffID" not in session:
+        return redirect("/")
+    return render_template("prescriptions.html")
+
+
+@app.route("/staff")
+def staff():
+    if "staffID" not in session:
+        return redirect("/")
+    return render_template("staff.html")
+
+
+# -------------------------
+# LOGOUT
+# -------------------------
+@app.route("/logout")
+def logout():
+    session.pop("staffID", None)
+    return redirect("/")
 
 
 if __name__ == "__main__":
