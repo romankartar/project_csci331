@@ -14,9 +14,7 @@ Base.metadata.create_all(engine)
 print("All tables recreated.")
 
 
-# -----------------------
-# PATIENT MAPPER
-# -----------------------
+#patient
 def map_patient_fields(data):
 
     mapped = []
@@ -51,10 +49,8 @@ def map_patient_fields(data):
     return mapped
 
 
-# -----------------------
-# SURGERY MAPPER
-# -----------------------
-def map_surgery_fields(data):
+# surgery
+def surgeryTable(data):
 
     mapped = []
 
@@ -173,7 +169,7 @@ print("Loading patients...")
 load_json("nosql/patients.json", Patient, mapper=map_patient_fields)
 
 print("Loading surgeries...")
-load_json("nosql/surgeries.json", Surgery, mapper=map_surgery_fields)
+load_json("nosql/surgeries.json", Surgery, mapper=surgeryTable)
 
 print("Loading prescriptions...")
 load_json("nosql/prescriptions.json", Prescription)
