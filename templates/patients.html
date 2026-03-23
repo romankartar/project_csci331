@@ -48,6 +48,7 @@
     {% if show_add_form %}
         <h3>Add New Patient</h3>
         <form method="POST" action="/add-patient">
+            <label>Patient ID (PHN):</label> <input type="text" name="patientID" required><br>
             <label>Name:</label><input type="text" name="name" required><br>
             <label>DOB:</label><input type="date" name="dob" required><br>
             <label>Age:</label><input type="number" name="age" required><br>
