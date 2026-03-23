@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, session
+from datetime import datetime
 from models import Staff, Patient, db_session
 
 app = Flask(__name__)
@@ -36,7 +37,7 @@ def home():
 
 
 # -------------------------
-# PATIENT PAGE (MAIN LOGIC)
+# PATIENT PAGE
 # -------------------------
 @app.route("/patients", methods=["GET", "POST"])
 def patients():
@@ -79,7 +80,7 @@ def patients():
 
 
 # -------------------------
-# ADD PATIENT (PHN PROVIDED BY USER)
+# ADD PATIENT
 # -------------------------
 @app.route("/add-patient", methods=["POST"])
 def add_patient():
@@ -91,16 +92,18 @@ def add_patient():
             return render_template("patients.html", show_add_form=True,
                                    message=f"{field} is required.")
 
-    # Check duplicate PHN
     existing = db_session.query(Patient).filter_by(patientID=data["patientID"]).first()
     if existing:
         return render_template("patients.html", show_add_form=True,
                                message="Patient ID already exists.")
 
+    # ✅ FIX: convert dob string → date
+    dob_obj = datetime.strptime(data["dob"], "%Y-%m-%d").date()
+
     new_patient = Patient(
         patientID=data["patientID"],
         name=data["name"],
-        dob=data["dob"],
+        dob=dob_obj,
         age=int(data["age"]),
         gender=data["gender"],
         phone=data["phone"],
@@ -128,8 +131,11 @@ def update_patient():
     if not patient:
         return render_template("patients.html", message="Patient not found.")
 
+    # ✅ FIX: convert dob string → date
+    dob_obj = datetime.strptime(request.form["dob"], "%Y-%m-%d").date()
+
     patient.name = request.form["name"]
-    patient.dob = request.form["dob"]
+    patient.dob = dob_obj
     patient.age = int(request.form["age"])
     patient.gender = request.form["gender"]
     patient.phone = request.form["phone"]
