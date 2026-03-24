@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Staff Login</title>
+    <link rel="stylesheet" type="text/css" href="/static/styler.css">
+</head>
+<body>
+
+<h2> Staff Login</h2>
+
+<form method="POST">
+    <label>Staff ID:</label>
+    <input type="text" name="staffID" required>
+    <br><br>
+    <label>Password:</label>
+    <input type="password" name="password" required>
+    <br><br>
+    <button type="submit">Login</button>
+</form>
+
+{% if error %}
+<p style="color:red;">{{ error }}</p>
+{% endif %}
+
+</body>
+</html>

@@ -3,41 +3,39 @@
 <head>
     <title>Prescriptions</title>
     <link rel="stylesheet" type="text/css" href="/static/styler.css">
-</head>        
-
+</head>
 <body>
+    <nav><ul>
+        <li><a href="/home">Home</a></li>
+        <li><a href="/patients">Patients</a></li>
+        <li><a href="/surgeries">Surgeries</a></li>
+        <li><a href="/prescriptions">Prescriptions</a></li>
+        <li><a href="/staff">Staff</a></li>
+    </ul></nav>
 
-<nav>
-<ul>
-    <li><a href="/home">Home</a></li>
-    <li><a href="/patients">Patients</a></li>
-    <li><a href="/surgeries">Surgeries</a></li>
-    <li><a href="/prescriptions">Prescriptions</a></li>
-    <li><a href="/staff">Staff</a></li>
-</ul>
-</nav>
+    <div class="container">
+        <div class="card">
+            <h2>Prescription Lookup 🔍</h2>
+            <form action="/lookup_prescription" method="GET">
+                <input type ="text" name ="patient_id" placeholder="Enter Patient ID">
+                <button type ="submit">Search History ✨</button>
+            </form>
+        </div>
 
-<h2>Search Patient by Date of Birth</h2>
-
-<form method="POST">
-    <label>Enter DOB:</label>
-    <input type="date" name="dob" required>
-    <button type="submit">Search</button>
-</form>
-
-{% if patient %}
-    <h3>Patient Found:</h3>
-    <p><strong>ID:</strong> {{ patient.patientID }}</p>
-    <p><strong>Name:</strong> {{ patient.name }}</p>
-    <p><strong>Age:</strong> {{ patient.age }}</p>
-    <p><strong>Gender:</strong> {{ patient.gender }}</p>
-    <p><strong>Phone:</strong> {{ patient.phone }}</p>
-    <p><strong>Address:</strong> {{ patient.address }}</p>
-    <p><strong>Allergies:</strong> {{ patient.allergies }}</p>
-    <p><strong>Conditions:</strong> {{ patient.conditions }}</p>
-{% elif patient is not none %}
-    <p>No patient found with that DOB.</p>
-{% endif %}
-
+        <div class="card">
+            <h2>New Prescription 📝</h2>
+            <form method ="POST" action="/add_prescription">
+                <input type ="text" name="patient_id" placeholder="Patient ID" required>
+                <select name ="medication_name">
+                    <option value="Amoxicillin">Amoxicillin</option>
+                    <option value="Ibuprofen">Ibuprofen</option>
+                    <option value="Paracetamol">Paracetamol</option>
+                </select>
+                <input type="text" name="dosage" placeholder="Dosage (e.g. 500mg)">
+                <input type="text" name="frequency" placeholder="Frequency">
+                <button type="submit">Save Medication </button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

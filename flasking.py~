@@ -2,6 +2,7 @@ from datetime import datetime
 from models import Staff, Patient, Surgery, db_session # Added Surgery here!
 from flask import Flask, render_template, request, redirect, session
 from models import Staff, Patient, db_session  # To  Patient is imported
+import json
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"  # Required for session
@@ -48,8 +49,21 @@ def home():
     current_time = "12:00" # A fake time to test the "Red Flag" logic!
 
     # Query surgeries for that specific test date
-    display_surgeries = db_session.query(Surgery).filter(Surgery.date == test_date).all() 
+    display_surgeries = db_session.query(Surgery).filter(Surgery.date == test_date).all()
+    
+    # 2. Look up the names for each staff member assigned to the surgery
+    for s in display_surgeries:
+        # 2. Convert the string '["ST0051", ...]' into a real Python list []
+        # We check if it's a string first just to be safe!
+        if isinstance(s.staffIDs, str):
+            ids_list = json.loads(s.staffIDs)
+        else:
+            ids_list = s.staffIDs
             
+        # Now SQLAlchemy can use the real list in the .in_() function
+        staff_members = db_session.query(Staff).filter(Staff.staffID.in_(ids_list)).all()
+        s.staff_list_names = ", ".join([m.name for m in staff_members])
+
     return render_template("home.html", 
                            surgeries = display_surgeries, 
                            current_time = current_time,

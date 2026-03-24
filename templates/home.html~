@@ -62,12 +62,12 @@
             {% else %}
                 <span style ="color: {{ 'red' if surgery.timeScheduled < current_time else 'blue' }};">
                    {{ ' LATE' if surgery.timeScheduled < current_time else ' Scheduled' }}
-            </span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %} 
-        </tbody>
+                </span>
+            {% endif %}
+        </td>
+    <% endfor %>
+    </tr> 
+</tbody>
     </table>
 </section>
 
