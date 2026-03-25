@@ -32,8 +32,8 @@ class Patient(Base):
     phone = Column(String, nullable=False)
     address = Column(String, nullable=False)
     primary_physician_id = Column(String, nullable=False)
-    allergies = Column(String, nullable=False)
-    conditions = Column(String, nullable=False)
+    allergies = Column(String, nullable=True)
+    conditions = Column(String, nullable=True)
 
 # -------------------
 # Surgery table

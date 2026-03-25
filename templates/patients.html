@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Patient Management</title>
+    <title>Patients</title>
     <link rel="stylesheet" type="text/css" href="/static/styler.css">
 </head>
 <body>
@@ -16,104 +16,110 @@
         </ul>
     </nav>
 
+    <h2>Patient Management</h2>
+
+    <form method="POST" action="/patients" style="display: flex; justify-content: center; gap: 10px; margin: 20px 0;">
+        <button type="submit" name="action" value="add">Add Patient</button>
+        <button type="submit" name="action" value="lookup">Look Up Patient</button>
+        <button type="submit" name="action" value="update">Update Patient</button>
+        <button type="submit" name="action" value="remove">Remove Patient</button>
+    </form>
+
+    {% if message %}
+        <p class="flash-message {{ message_type }}">{{ message }}</p>
+    {% endif %}
+
     <div class="container">
-        <!-- Action Dashboard Card -->
+
+        {% if patient %}
         <div class="card">
-            <h2 style="color: var(--deep-rose);">Patient Management </h2>
-            <form method="POST" action="/patients">
-                <button type="submit" name="action" value="add">  Add Patient</button>
-                <button type="submit" name="action" value="lookup">  Look Up</button>
-                <button type="submit" name="action" value="update">  Update</button>
-                <button type="submit" name="action" value="remove">  Remove</button>
+            <h3>Patient Info 👤</h3>
+            <p><strong>ID:</strong> {{ patient.patientID }}</p>
+            <p><strong>Name:</strong> {{ patient.name }}</p>
+            <p><strong>Age:</strong> {{ patient.age }}</p>
+            <p><strong>Gender:</strong> {{ patient.gender }}</p>
+            <p><strong>DOB:</strong> {{ patient.dob }}</p>
+            <p><strong>Phone:</strong> {{ patient.phone }}</p>
+            <p><strong>Address:</strong> {{ patient.address }}</p>
+            <p><strong>Allergies:</strong> {{ patient.allergies }}</p>
+            <p><strong>Conditions:</strong> {{ patient.conditions }}</p>
+        </div>
+        {% endif %}
+
+        {% if show_add_form %}
+        <div class="card">
+            <h3>Add New Patient 📝</h3>
+            <form method="POST" action="/add-patient">
+                <input type="text" name="patientID" placeholder="Patient ID (PHN)" required>
+                <input type="text" name="name" placeholder="Name" required>
+                <input type="date" name="dob" required>
+
+                <select name="gender" required>
+                    <option value="" disabled selected hidden>Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Non-binary">Non-binary</option>
+                </select>
+
+                <input type="text" name="phone" placeholder="Phone" required>
+                <input type="text" name="address" placeholder="Address" required>
+                <input type="text" name="allergies" placeholder="Allergies">
+                <input type="text" name="conditions" placeholder="Conditions">
+                <button type="submit">Add Patient</button>
             </form>
         </div>
-
-        <!-- Notification Messages -->
-        {% if message %}
-            <div class="card" style="border-left: 5px solid var(--primary-pink); color: var(--deep-rose);">
-                <p>✨ {{ message }}</p>
-            </div>
         {% endif %}
 
-        <!-- Patient Info Card (Shows when a patient is found) -->
-        {% if patient %}
-            <div class="card">
-                <h3>Patient Record: {{ patient.name }} </h3>
-                <table>
-                    <tr>
-                        <td><strong>ID:</strong> {{ patient.patientID }}</td>
-                        <td><strong>Age:</strong> {{ patient.age }}</td>
-                        <td><strong>Gender:</strong> {{ patient.gender }}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>DOB:</strong> {{ patient.dob }}</td>
-                        <td><strong>Phone:</strong> {{ patient.phone }}</td>
-                        <td><strong>Address:</strong> {{ patient.address }}</td>
-                    </tr>
-                </table>
-                <p><strong>Allergies:</strong> {{ patient.allergies or 'None' }}</p>
-                <p><strong>Conditions:</strong> {{ patient.conditions or 'None' }}</p>
-            </div>
-        {% endif %}
-
-        <!-- Form: ADD NEW PATIENT -->
-        {% if show_add_form %}
-            <div class="card">
-                <h3>Add New Patient ✨</h3>
-                <form method="POST" action="/add-patient">
-                    <label>Name:</label><br><input type="text" name="name" required><br>
-                    <label>DOB:</label><br><input type="date" name="dob" required><br>
-                    <label>Age:</label><br><input type="number" name="age" required><br>
-                    <label>Gender:</label><br><input type="text" name="gender" required><br>
-                    <label>Phone:</label><br><input type="text" name="phone" required><br>
-                    <label>Address:</label><br><input type="text" name="address" required><br>
-                    <label>Allergies:</label><br><input type="text" name="allergies" placeholder="e.g. Peanuts, Latex"><br>
-                    <label>Conditions:</label><br><input type="text" name="conditions" placeholder="e.g. Asthma"><br><br>
-                    <button type="submit">Confirm Add 💖</button>
-                </form>
-            </div>
-        {% endif %}
-
-        <!-- Form: LOOKUP PATIENT -->
         {% if show_lookup_form %}
-            <div class="card">
-                <h3>Find Patient Record </h3>
-                <form method="POST" action="/patients">
-                    <label>Enter Patient ID:</label><br>
-                    <input type="text" name="patientID" required placeholder="P000000001">
-                    <button type="submit" name="action" value="{% if update_mode %}update{% elif remove_mode %}remove{% else %}lookup{% endif %}">
-                        Search Record 
-                    </button>
-                </form>
-            </div>
+        <div class="card">
+            <h3>Lookup Patient 🔍</h3>
+            <form method="POST" action="/patients">
+                <input type="hidden" name="action" value="{{ 'update' if update_mode else ('remove' if remove_mode else 'lookup') }}">
+                <input type="text" name="search_value" placeholder="Enter ID or Name" required>
+
+                <button type="submit" name="search_type" value="id">By ID</button>
+                <button type="submit" name="search_type" value="name">By Name</button>
+            </form>
+        </div>
         {% endif %}
 
-        <!-- Form: UPDATE PATIENT -->
         {% if show_update_form %}
-            <div class="card">
-                <h3>Update Information for {{ patient.name }} </h3>
-                <form method="POST" action="/update-patient">
-                    <input type="hidden" name="patientID" value="{{ patient.patientID }}">
-                    <label>Phone:</label><br><input type="text" name="phone" value="{{ patient.phone }}"><br>
-                    <label>Address:</label><br><input type="text" name="address" value="{{ patient.address }}"><br>
-                    <label>Conditions:</label><br><input type="text" name="conditions" value="{{ patient.conditions }}"><br><br>
-                    <button type="submit">Save Changes </button>
-                </form>
-            </div>
+        <div class="card">
+            <h3>Update Patient ✏️</h3>
+            <form method="POST" action="/update-patient">
+                <input type="hidden" name="patientID" value="{{ patient.patientID }}">
+                <input type="text" name="name" value="{{ patient.name }}" required>
+
+                <input type="date" name="dob" value="{{ patient.dob.strftime('%Y-%m-%d') }}" required>
+
+                <select name="gender" required>
+                    <option value="Male" {% if patient.gender == "Male" %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if patient.gender == "Female" %}selected{% endif %}>Female</option>
+                    <option value="Non-binary" {% if patient.gender == "Non-binary" %}selected{% endif %}>Non-binary</option>
+                </select>
+
+                <input type="text" name="phone" value="{{ patient.phone }}" required>
+                <input type="text" name="address" value="{{ patient.address }}" required>
+                <input type="text" name="allergies" value="{{ patient.allergies }}">
+                <input type="text" name="conditions" value="{{ patient.conditions }}">
+                <button type="submit">Update Patient</button>
+            </form>
+        </div>
         {% endif %}
 
-        <!-- Form: REMOVE CONFIRMATION -->
         {% if show_remove_confirm %}
-            <div class="card" style="background-color: #fff0f3; border: 2px solid var(--primary-pink);">
-                <h3> Confirm Deletion</h3>
-                <p>Are you sure you want to delete <strong>{{ patient.name }}</strong> from the ward system?</p>
-                <form method="POST" action="/remove-patient">
-                    <input type="hidden" name="patientID" value="{{ patient.patientID }}">
-                    <button type="submit" name="confirm" value="yes" style="background-color: #ff5252;">Yes, Delete</button>
-                    <button type="submit" name="confirm" value="no" style="background-color: #9e9e9e;">Cancel</button>
-                </form>
-            </div>
+        <div class="card">
+            <h3>Confirm Deletion ⚠️</h3>
+            <p>Are you sure you want to delete <strong>{{ patient.name }}</strong>?</p>
+            <form method="POST" action="/remove-patient">
+                <input type="hidden" name="patientID" value="{{ patient.patientID }}">
+                <button type="submit" name="confirm" value="yes">Yes</button>
+                <button type="submit" name="confirm" value="no">Cancel</button>
+            </form>
+        </div>
         {% endif %}
+
     </div>
+
 </body>
 </html>

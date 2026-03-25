@@ -5,37 +5,153 @@
     <link rel="stylesheet" type="text/css" href="/static/styler.css">
 </head>
 <body>
-    <nav><ul>
-        <li><a href="/home">Home</a></li>
-        <li><a href="/patients">Patients</a></li>
-        <li><a href="/surgeries">Surgeries</a></li>
-        <li><a href="/prescriptions">Prescriptions</a></li>
-        <li><a href="/staff">Staff</a></li>
-    </ul></nav>
+    <nav>
+        <ul>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/patients">Patients</a></li>
+            <li><a href="/surgeries">Surgeries</a></li>
+            <li><a href="/prescriptions">Prescriptions</a></li>
+            <li><a href="/staff">Staff</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+
+    <h2>Prescription Management</h2>
+
+    <form method="POST" action="/prescriptions" style="display: flex; justify-content: center; gap: 10px; margin: 20px 0;">
+        <button type="submit" name="action" value="add">Add Prescription</button>
+        <button type="submit" name="action" value="lookup">Look Up and Update Prescription</button>
+    </form>
+
+    {% if message %}
+        <p class="flash-message {{ message_type }}">{{ message }}</p>
+    {% endif %}
 
     <div class="container">
+        {% if show_lookup_form or prescription_list %}
         <div class="card">
-            <h2>Prescription Lookup 🔍</h2>
-            <form action="/lookup_prescription" method="GET">
-                <input type ="text" name ="patient_id" placeholder="Enter Patient ID">
-                <button type ="submit">Search History ✨</button>
-            </form>
-        </div>
+            <h3>Lookup Prescription 🔍</h3>
 
-        <div class="card">
-            <h2>New Prescription 📝</h2>
-            <form method ="POST" action="/add_prescription">
-                <input type ="text" name="patient_id" placeholder="Patient ID" required>
-                <select name ="medication_name">
-                    <option value="Amoxicillin">Amoxicillin</option>
-                    <option value="Ibuprofen">Ibuprofen</option>
-                    <option value="Paracetamol">Paracetamol</option>
-                </select>
-                <input type="text" name="dosage" placeholder="Dosage (e.g. 500mg)">
-                <input type="text" name="frequency" placeholder="Frequency">
-                <button type="submit">Save Medication </button>
+            <form method="POST" action="/prescriptions">
+                <input type="text" id="search_value" name="search_value" placeholder="Enter ID / Name" required>
+        
+                <button type="submit" name="lookup_type" value="direct"> By Prescription/Surgery ID</button>
+                <button type="submit" name="lookup_type" value="patient">By Patient name</button>
             </form>
         </div>
+        {% endif %}
+
+        {% if prescription %}
+        {% if show_edit_prompt %}
+        <div class="card">
+            <h3>Do you want to update this prescription?</h3>
+        
+            <form method="POST" action="/prescriptions">
+                <input type="hidden" name="prescriptionID" value="{{ prescription.prescriptionID }}">
+        
+                <button type="submit" name="action" value="confirm_edit">Yes</button>
+                <button type="submit" name="action" value="cancel_edit">No</button>
+            </form>
+        </div>
+        {% endif %}
+        
+        <div class="card">
+            <h3>Prescription Info 💊</h3>
+            <p><strong>ID:</strong> {{ prescription.prescriptionID }}</p>
+            <p><strong>Patient ID:</strong> {{ prescription.patientID }}</p>
+            <p><strong>Surgery ID:</strong> {{ prescription.surgeryID }}</p>
+            <p><strong>Medication:</strong> {{ prescription.medicationName }}</p>
+            <p><strong>Dosage:</strong> {{ prescription.dosage }}</p>
+            <p><strong>Frequency:</strong> {{ prescription.frequency }}</p>
+            <p><strong>Duration:</strong> {{ prescription.duration }}</p>
+            <p><strong>Prescribed By:</strong> {{ prescription.prescribedBy }}</p>
+        </div>
+        {% endif %}
+
+        {% if prescription_list %}
+        <div class="card">
+            <h3>Patient Prescriptions 📋</h3>
+
+            <table>
+                <tr>
+                    <th>Prescription ID</th>
+                    <th>Surgery ID</th>
+                    <th>Medication</th>
+                    <th>Dosage</th>
+                </tr>
+
+                {% for p in prescription_list %}
+                <tr>
+                    <td>
+                        <a href="#" onclick="fillLookup('{{ p.prescriptionID }}')">
+                            {{ p.prescriptionID }}
+                        </a>
+                    </td>
+                    <td>{{ p.surgeryID }}</td>
+                    <td>{{ p.medicationName }}</td>
+                    <td>{{ p.dosage }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% endif %}
+
+        {% if show_add_form %}
+        <div class="card">
+            <h3>Add New Prescription 📝</h3>
+            <form method="POST" action="/add-prescription">
+
+            <input type="text" name="surgeryID" placeholder="Surgery ID (e.g. S0004)" required>
+
+            <select name="medicationName" required>
+                <option disabled selected>Select Medication</option>
+                <option>Amoxicillin</option>
+                <option>Ibuprofen</option>
+                <option>Diclofenac</option>
+                <option>Metronidazole</option>
+                <option>Paracetamol</option>
+                <option>Cefuroxime</option>
+                <option>Ceftriaxone</option>
+                <option>Morphine</option>
+            </select>
+
+            <input type="number" name="dosage" placeholder="Dosage (in mg)" required>
+            <input type="text" name="frequency" placeholder="Frequency" required>
+            <input type="text" name="duration" placeholder="Duration" required>
+            <input type="text" name="prescribedBy" placeholder="Prescribed By (Staff ID)" required>
+            <button type="submit">Add Prescription</button>
+        </form>
     </div>
+    {% endif %}
+
+        {% if show_update_form %}
+        <div class="card">
+            <h3>Update Prescription ✏️</h3>
+            <form method="POST" action="/update-prescription">
+
+                <input type="hidden" name="prescriptionID" value="{{ prescription.prescriptionID }}">
+
+                <input type="hidden" name="patientID" value="{{ prescription.patientID }}" >
+                <input type="hidden" name="surgeryID" value="{{ prescription.surgeryID }}" >
+                <input type="text" name="medicationName" value="{{ prescription.medicationName }}" required>
+                <input type="text" name="dosage" value="{{ prescription.dosage }}" required>
+                <input type="text" name="frequency" value="{{ prescription.frequency }}" required>
+                <input type="text" name="duration" value="{{ prescription.duration }}" required>
+                <input type="text" name="prescribedBy" value="{{ prescription.prescribedBy }}" required>
+
+                <button type="submit">Update Prescription</button>
+            </form>
+        </div>
+        {% endif %}
+
+
+    </div>
+
+<script>
+function fillLookup(id) {
+    document.getElementById("search_value").value = id;
+}
+</script>
+
 </body>
 </html>

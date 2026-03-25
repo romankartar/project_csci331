@@ -81,3 +81,23 @@ input, select {
 }
 
 .overdue-flag { background-color: var(--alert-red) !important; }
+
+h2 {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.flash-message {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.flash-message.error {
+    color: red;
+    padding-left: 50px;
+}
+
+.flash-message.success {
+    text-align: center;
+    color: green;
+}
