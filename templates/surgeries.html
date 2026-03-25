@@ -48,7 +48,6 @@
     <p><strong>Date:</strong> {{ surgery.date }}</p>
     <p><strong>Time:</strong> {{ surgery.timeScheduled }}</p>
 
-    <!-- ✅ NEW FIELDS -->
     <p><strong>Anesthesia Used:</strong> {{ surgery.anesthesia.used if surgery.anesthesia else None }}</p>
     <p><strong>Anesthesia Type:</strong> {{ surgery.anesthesia.type if surgery.anesthesia else None }}</p>
     <p><strong>Anesthesia Dosage:</strong> {{ surgery.anesthesia.dosage if surgery.anesthesia else None }}</p>
@@ -62,7 +61,6 @@
 </div>
 {% endif %}
 
-<!-- ADD FORM (unchanged) -->
 {% if show_add_form %}
 <div class="card">
     <h3>Add Surgery 📝</h3>
@@ -109,7 +107,6 @@
 </div>
 {% endif %}
 
-<!-- LOOKUP FORM (unchanged) -->
 {% if show_lookup_form %}
 <div class="card">
     <h3>Lookup Surgery 🔍</h3>
@@ -121,7 +118,6 @@
 </div>
 {% endif %}
 
-<!-- UPDATE FORM -->
 {% if show_update_form %}
 <div class="card">
     <h3>Update Surgery ✏️</h3>
@@ -184,7 +180,6 @@
 </div>
 {% endif %}
 
-<!-- REMOVE CONFIRM -->
         {% if show_remove_confirm %}
         <div class="card">
             <h3>Confirm Deletion ⚠️</h3>
@@ -203,20 +198,16 @@
     const surgeryMap = {{ surgery_map | tojson }};
 </script>
 
-<!-- ✅ Dynamic dropdown logic -->
 <script>
     const typeSelect = document.getElementById("surgeryType");
     const nameSelect = document.getElementById("surgeryName");
 
-    // Safety check (prevents errors on pages where form isn't shown)
     if (typeSelect && nameSelect) {
         typeSelect.addEventListener("change", function() {
             const selectedType = this.value;
 
-            // Clear previous options
             nameSelect.innerHTML = '<option value="" disabled selected>Select Surgery</option>';
 
-            // Populate based on selected type
             if (surgeryMap[selectedType]) {
                 surgeryMap[selectedType].forEach(name => {
                     const option = document.createElement("option");

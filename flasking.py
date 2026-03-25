@@ -5,9 +5,7 @@ from flask import Flask, render_template, request, redirect, session
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
-# -------------------------
-# Helper function
-# -------------------------
+# helper functions
 def calculate_age(dob):
     today = datetime.today().date()
     return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
@@ -34,11 +32,10 @@ def get_most_recent_clock(shift):
     if not times:
         return "--"
 
-    return max(times).split(" ")[1]  # return only HH:MM
+    return max(times).split(" ")[1]  
 
 
 def normalize_surgery_id(surgery_id: str):
-    # Accepts: 0004, S0004, PR0004
     if surgery_id.startswith("PR"):
         return surgery_id[2:]
     if surgery_id.startswith("S"):
@@ -119,9 +116,7 @@ STAFF_GROUPS = {
     ]
 }
 
-# -------------------------
-# LOGIN PAGE
-# -------------------------
+# login
 @app.route("/", methods=["GET", "POST"])
 def login():
     error = None
@@ -143,9 +138,7 @@ def login():
     return render_template("index.html", error=error)
 
 
-# -------------------------
-# HOME PAGE
-# -------------------------
+# home 
 @app.route("/home")
 def home():
     if "staffID" not in session:
@@ -170,9 +163,8 @@ def home():
 
 
 
-# -------------------------
-# PATIENT PAGE
-# -------------------------
+
+# patient
 @app.route("/patients", methods=["GET", "POST"])
 def patients():
     if "staffID" not in session:
@@ -222,10 +214,6 @@ def patients():
 
     return render_template("patients.html")
 
-
-# -------------------------
-# ADD PATIENT
-# -------------------------
 @app.route("/add-patient", methods=["POST"])
 def add_patient():
     data = request.form
@@ -259,10 +247,6 @@ def add_patient():
 
     return render_template("patients.html", patient=new_patient, message="Patient added successfully.", message_type="success")
 
-
-# -------------------------
-# UPDATE PATIENT
-# -------------------------
 @app.route("/update-patient", methods=["POST"])
 def update_patient():
     pid = request.form.get("patientID")
@@ -290,9 +274,6 @@ def update_patient():
     return render_template("patients.html", patient=patient, message="Patient updated successfully.", message_type="success")
 
 
-# -------------------------
-# REMOVE PATIENT
-# -------------------------
 @app.route("/remove-patient", methods=["POST"])
 def remove_patient():
     pid = request.form.get("patientID")
@@ -317,10 +298,6 @@ def prescriptions():
     if request.method == "POST":
 
         action = request.form.get("action")
-
-        # -------------------------
-        # BUTTON ACTIONS
-        # -------------------------
         if action == "add":
             return render_template("prescriptions.html", show_add_form=True)
 
@@ -337,18 +314,12 @@ def prescriptions():
 
         elif action == "cancel_edit":
             return render_template("prescriptions.html", show_lookup_form=True)
-        # -------------------------
-        # LOOKUP LOGIC
-        # -------------------------
+
         search_value = request.form.get("search_value", "").strip()
         lookup_type = request.form.get("lookup_type")
 
-        # -------------------------
-        # DIRECT LOOKUP (Prescription / Surgery ID)
-        # -------------------------
         if lookup_type == "direct":
 
-            # Normalize to prescription ID
             if search_value.startswith("PR"):
                 pid = search_value
             elif search_value.startswith("S"):
@@ -356,50 +327,24 @@ def prescriptions():
             else:
                 pid = "PR" + search_value
 
-            prescription = db_session.query(Prescription).filter_by(
-                prescriptionID=pid
-            ).first()
+            prescription = db_session.query(Prescription).filter_by(prescriptionID=pid).first()
 
             if not prescription:
-                return render_template(
-                    "prescriptions.html",
-                    show_lookup_form=True,
-                    message="No prescription found.",
-                    message_type="error"
-                )
+                return render_template("prescriptions.html",show_lookup_form=True,message="No prescription found.",message_type="error")
 
-            # ✅ Always go to update form after lookup
-            return render_template(
-                "prescriptions.html",
-                prescription=prescription,
-                show_edit_prompt=True
-            )
+            return render_template("prescriptions.html",prescription=prescription,show_edit_prompt=True)
 
-        # -------------------------
-        # PATIENT LOOKUP
-        # -------------------------
         elif lookup_type == "patient":
 
             if search_value.startswith("P"):
-                patient = db_session.query(Patient).filter_by(
-                    patientID=search_value
-                ).first()
+                patient = db_session.query(Patient).filter_by(patientID=search_value).first()
             else:
-                patient = db_session.query(Patient).filter(
-                    Patient.name.ilike(search_value)
-                ).first()
+                patient = db_session.query(Patient).filter(Patient.name.ilike(search_value)).first()
 
             if not patient:
-                return render_template(
-                    "prescriptions.html",
-                    show_lookup_form=True,
-                    message="Patient not found.",
-                    message_type="error"
-                )
+                return render_template("prescriptions.html",show_lookup_form=True,message="Patient not found.",message_type="error")
 
-            prescriptions = db_session.query(Prescription).filter_by(
-                patientID=patient.patientID
-            ).all()
+            prescriptions = db_session.query(Prescription).filter_by(patientID=patient.patientID).all()
 
             return render_template(
                 "prescriptions.html",
@@ -420,64 +365,26 @@ def add_prescription():
     duration = data.get("duration")
     prescribed_by = data.get("prescribedBy")
 
-    # -------------------------
-    # Normalize Surgery ID → PR ID
-    # -------------------------
     surgery_id = normalize_surgery_id(surgery_id_raw)
     prescription_id = "PR" + surgery_id
 
-    # -------------------------
-    # Validate Surgery exists
-    # -------------------------
     surgery = db_session.query(Surgery).filter_by(surgeryID=surgery_id_raw).first()
     if not surgery:
-        return render_template(
-            "prescriptions.html",
-            show_add_form=True,
-            message="Invalid Surgery ID.",
-            message_type="error"
-        )
+        return render_template("prescriptions.html",show_add_form=True,message="Invalid Surgery ID.",message_type="error")
 
-    # -------------------------
-    # Extract Patient ID from Surgery
-    # -------------------------
     patient_id = surgery.patientID
 
-    # -------------------------
-    # Validate Staff ID exists
-    # -------------------------
     staff = db_session.query(Staff).filter_by(staffID=prescribed_by).first()
     if not staff:
-        return render_template(
-            "prescriptions.html",
-            show_add_form=True,
-            message="Invalid Staff ID.",
-            message_type="error"
-        )
+        return render_template("prescriptions.html",show_add_form=True,message="Invalid Staff ID.",message_type="error")
 
-    # -------------------------
-    # Validate prescription uniqueness
-    # -------------------------
-    existing = db_session.query(Prescription).filter_by(
-        prescriptionID=prescription_id
-    ).first()
+    existing = db_session.query(Prescription).filter_by(prescriptionID=prescription_id).first()
 
     if existing:
-        return render_template(
-            "prescriptions.html",
-            show_add_form=True,
-            message="Prescription already exists for this surgery.",
-            message_type="error"
-        )
+        return render_template("prescriptions.html",show_add_form=True,message="Prescription already exists for this surgery.",message_type="error")
 
-    # -------------------------
-    # Format dosage
-    # -------------------------
     dosage = f"{dosage_input} mg"
 
-    # -------------------------
-    # Create Prescription
-    # -------------------------
     new_prescription = Prescription(
         prescriptionID=prescription_id,
         patientID=patient_id,
@@ -492,12 +399,7 @@ def add_prescription():
     db_session.add(new_prescription)
     db_session.commit()
 
-    return render_template(
-        "prescriptions.html",
-        prescription=new_prescription,
-        message="Prescription added successfully.",
-        message_type="success"
-    )
+    return render_template("prescriptions.html",prescription=new_prescription,message="Prescription added successfully.",message_type="success")
 
 @app.route("/update-prescription", methods=["POST"])
 def update_prescription():
@@ -508,11 +410,7 @@ def update_prescription():
     ).first()
 
     if not prescription:
-        return render_template(
-            "prescriptions.html",
-            message="Prescription not found.",
-            message_type="error"
-        )
+        return render_template("prescriptions.html",message="Prescription not found.",message_type="error")
 
     prescription.patientID = request.form["patientID"]
     prescription.surgeryID = request.form["surgeryID"]
@@ -524,12 +422,7 @@ def update_prescription():
 
     db_session.commit()
 
-    return render_template(
-        "prescriptions.html",
-        prescription=prescription,
-        message="Prescription updated successfully.",
-        message_type="success"
-    )
+    return render_template("prescriptions.html",prescription=prescription,message="Prescription updated successfully.",message_type="success")
 
 @app.route("/add-staff", methods=["POST"])
 def add_staff():
@@ -544,7 +437,6 @@ def add_staff():
 
     staff_id = generate_staff_id()
 
-    # Mode logic
     if role == "Nurse":
         mode = "full"
     else:
@@ -617,7 +509,6 @@ def update_staff():
     staff.role = role
     staff.password = request.form["password"]
 
-    # Mode rule
     if role == "Nurse":
         staff.mode = "full"
     else:
@@ -734,7 +625,6 @@ def update_surgery():
                                message_type="error",
                                surgery_map=SURGERY_MAP)
 
-    # basic fields
     patient_id = request.form.get("patientID")
     if not patient_id.startswith("P"):
         patient_id = "P" + patient_id
@@ -785,10 +675,8 @@ def shift():
 
     staff_id = session.get("staffID")
 
-    # Fixed test date as requested
     target_date = "2026-04-12"
 
-    # Get the shift for this staff on that date
     shift = db_session.query(Shift).filter_by(staffID=staff_id,date=target_date).first()
 
     if not shift:
@@ -796,18 +684,13 @@ def shift():
 
     recent_clock = get_most_recent_clock(shift)
 
-    # Get surgeries assigned to this staff on that date
-    surgeries = db_session.query(Surgery).filter(
-        Surgery.date == target_date
-    ).all()
+    surgeries = db_session.query(Surgery).filter(Surgery.date == target_date).all()
 
-    # Filter surgeries assigned to this staff (assuming staffIDs stored in JSON or list)
     staff_surgeries = []
     for surgery in surgeries:
         if hasattr(surgery, "staffIDs") and staff_id in (surgery.staffIDs or []):
             staff_surgeries.append(surgery)
 
-    # Sort surgeries by time
     staff_surgeries.sort(key=lambda s: s.timeScheduled)
 
     return render_template("shift.html",shift=shift,surgeries=staff_surgeries, recent_clock=recent_clock)
@@ -820,10 +703,7 @@ def clock_in():
     staff_id = session.get("staffID")
     target_date = "2026-04-12"
 
-    shift = db_session.query(Shift).filter_by(
-        staffID=staff_id,
-        date=target_date
-    ).first()
+    shift = db_session.query(Shift).filter_by(staffID=staff_id,date=target_date).first()
 
     if shift:
         shift.clockIn = get_current_timestamp()
@@ -838,12 +718,9 @@ def lunch_in():
         return redirect("/")
 
     staff_id = session.get("staffID")
-    target_date = "2026-04-12"
+    target_date = "2026-04-12" # for now but later will be current date 
 
-    shift = db_session.query(Shift).filter_by(
-        staffID=staff_id,
-        date=target_date
-    ).first()
+    shift = db_session.query(Shift).filter_by(staffID=staff_id,date=target_date).first()
 
     if shift:
         shift.lunchClockIn = get_current_timestamp()
@@ -860,10 +737,7 @@ def lunch_out():
     staff_id = session.get("staffID")
     target_date = "2026-04-12"
 
-    shift = db_session.query(Shift).filter_by(
-        staffID=staff_id,
-        date=target_date
-    ).first()
+    shift = db_session.query(Shift).filter_by(staffID=staff_id,date=target_date).first()
 
     if shift:
         shift.lunchClockOut = get_current_timestamp()
@@ -880,10 +754,7 @@ def clock_out():
     staff_id = session.get("staffID")
     target_date = "2026-04-12"
 
-    shift = db_session.query(Shift).filter_by(
-        staffID=staff_id,
-        date=target_date
-    ).first()
+    shift = db_session.query(Shift).filter_by(staffID=staff_id,date=target_date).first()
 
     if shift:
         shift.clockOut = get_current_timestamp()
@@ -891,9 +762,7 @@ def clock_out():
 
     return redirect("/shift")
 
-# -------------------------
-# LOGOUT
-# -------------------------
+
 @app.route("/logout")
 def logout():
     session.pop("staffID", None)

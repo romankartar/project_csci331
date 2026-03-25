@@ -1,5 +1,3 @@
-# loading.py
-
 import json
 from datetime import datetime
 from models import Base, engine, session, Staff, Patient, Surgery, Prescription, Shift
@@ -97,9 +95,7 @@ def surgeryTable(data):
     return mapped
 
 
-# -----------------------
-# SHIFT MAPPER
-# -----------------------
+# shift
 def map_shift_fields(data):
 
     mapped = []
@@ -132,9 +128,6 @@ def map_shift_fields(data):
     return mapped
 
 
-# -----------------------
-# GENERIC JSON LOADER
-# -----------------------
 def load_json(file_path, Model, mapper=None):
 
     with open(file_path, "r") as f:
@@ -157,24 +150,20 @@ def load_json(file_path, Model, mapper=None):
 
     print(f"Loaded {file_path}")
 
-
-# -----------------------
-# LOAD FILES
-# -----------------------
-
+# loading
 print("Loading staff...")
-load_json("nosql/staff.json", Staff)
+load_json("jsonFiles/staff.json", Staff)
 
 print("Loading patients...")
-load_json("nosql/patients.json", Patient, mapper=map_patient_fields)
+load_json("jsonFiles/patients.json", Patient, mapper=map_patient_fields)
 
 print("Loading surgeries...")
-load_json("nosql/surgeries.json", Surgery, mapper=surgeryTable)
+load_json("jsonFiles/surgeries.json", Surgery, mapper=surgeryTable)
 
 print("Loading prescriptions...")
-load_json("nosql/prescriptions.json", Prescription)
+load_json("jsonFiles/prescriptions.json", Prescription)
 
 print("Loading shifts...")
-load_json("nosql/shifts.json", Shift, mapper=map_shift_fields)
+load_json("jsonFiles/shifts.json", Shift, mapper=map_shift_fields)
 
 print("All data loaded successfully!")

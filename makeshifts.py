@@ -5,10 +5,10 @@ from datetime import datetime, timedelta
 # -------------------
 # Output paths
 # -------------------
-SURGERY_FILE = "nosql/surgeries.json"
-PRESCRIPTION_FILE = "nosql/prescriptions.json"
-STAFF_FILE = "nosql/staff.json"
-SHIFTS_FILE = "nosql/shifts.json"
+SURGERY_FILE = "jsonFiles/surgeries.json"
+PRESCRIPTION_FILE = "jsonFiles/prescriptions.json"
+STAFF_FILE = "jsonFiles/staff.json"
+SHIFTS_FILE = "jsonFiles/shifts.json"
 
 # -------------------
 # Configuration

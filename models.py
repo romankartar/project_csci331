@@ -6,9 +6,6 @@ Session = sessionmaker(bind=engine)
 db_session = Session()
 Base = declarative_base()
 
-# -------------------
-# Staff table
-# -------------------
 class Staff(Base):
     __tablename__ = "staff"
 
@@ -18,9 +15,6 @@ class Staff(Base):
     mode = Column(String, nullable=False)
     password = Column(String, nullable=False)
 
-# -------------------
-# Patient table
-# -------------------
 class Patient(Base):
     __tablename__ = "patients"
 
@@ -35,9 +29,6 @@ class Patient(Base):
     allergies = Column(String, nullable=True)
     conditions = Column(String, nullable=True)
 
-# -------------------
-# Surgery table
-# -------------------
 class Surgery(Base):
     __tablename__ = "surgeries"
 
@@ -62,9 +53,6 @@ class Surgery(Base):
     recoveryNotes = Column(String, nullable=True)
     status = Column(String, nullable=False)
 
-# -------------------
-# Prescription table
-# -------------------
 class Prescription(Base):
     __tablename__ = "prescriptions"
 
@@ -77,9 +65,6 @@ class Prescription(Base):
     duration = Column(String, nullable=False)
     prescribedBy = Column(String, nullable=False)
 
-# -------------------
-# Shift table
-# -------------------
 class Shift(Base):
     __tablename__ = "shifts"
 
@@ -97,9 +82,6 @@ class Shift(Base):
     lunchClockOut = Column(JSON, nullable=True)
     clockOut = Column(JSON, nullable=True)
 
-# -------------------
-# Database setup
-# -------------------
 engine = create_engine("sqlite:///hospital.db")
 
 Base.metadata.create_all(engine)
