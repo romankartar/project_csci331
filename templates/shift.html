@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>shift</title>
+    <link rel="stylesheet" type="text/css" href="/static/styler.css">
+</head>
+<body>
+
+<nav>
+    <ul>
+        <li><a href="/home">Home</a></li>
+        <li><a href="/patients">Patients</a></li>
+        <li><a href="/surgeries">Surgeries</a></li>
+        <li><a href="/prescriptions">Prescriptions</a></li>
+        <li><a href="/staff">Staff</a></li>
+        <li><a href="/shift">Shift</a></li>
+        <li><a href="/logout">Logout</a></li>
+    </ul>
+</nav>
+
+<h2>Shift Schedule</h2>
+
+{% if message %}
+    <p class="flash-message {{ message_type }}">{{ message }}</p>
+{% endif %}
+
+<div class="container">
+
+    {% if shift %}
+
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+
+        <div class="card" style="flex: 1; min-width: 300px;">
+            <h3>Shift Info</h3>
+            <p><strong>Date:</strong> {{ shift.date }}</p>
+            <p><strong>Start Time:</strong> {{ shift.startTime }}</p>
+
+            <p><strong>Lunch:</strong>
+                {% if shift.startTime == "07:00" %}
+                    11:55
+                {% elif shift.startTime == "15:00" %}
+                    19:55
+                {% elif shift.startTime == "23:00" %}
+                    03:55
+                {% else %}
+                    --
+                {% endif %}
+            </p>
+            
+            <p><strong>End Time:</strong> {{ shift.endTime }}</p>
+            <p><strong>Status:</strong> {{ shift.status }}</p>
+        </div>
+
+        <div class="card" style="flex: 1; min-width: 300px; text-align: center; display: flex; flex-direction: column; align-items: center;">
+            <h3>Clock Actions ⏱️</h3>
+
+            <p><strong>Most Recent Clock:</strong> {{ recent_clock }}</p>
+
+            <p>
+                <strong>Clock In:</strong>
+                {% if shift.clockIn %}{{ shift.clockIn.time }}{% else %}00:00{% endif %}
+            </p>
+
+            <p>
+                <strong>Lunch In:</strong>
+                {% if shift.lunchClockIn %}{{ shift.lunchClockIn.time }}{% else %}--{% endif %}
+            </p>
+
+            <p>
+                <strong>Lunch Out:</strong>
+                {% if shift.lunchClockOut %}{{ shift.lunchClockOut.time }}{% else %}--{% endif %}
+            </p>
+
+            <p>
+                <strong>Clock Out:</strong>
+                {% if shift.clockOut %}{{ shift.clockOut.time }}{% else %}--{% endif %}
+            </p>
+
+            <form method="POST" action="/clock-in" style="margin: 5px 0;">
+                <button type="submit">Start Shift</button>
+            </form>
+
+            <form method="POST" action="/lunch-in" style="margin: 5px 0;">
+                <button type="submit">Lunch Start</button>
+            </form>
+
+            <form method="POST" action="/lunch-out" style="margin: 5px 0;">
+                <button type="submit">Lunch End</button>
+            </form>
+
+            <form method="POST" action="/clock-out" style="margin: 5px 0;">
+                <button type="submit">End Shift</button>
+            </form>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+    {% if surgeries %}
+    <div class="card" style="margin-top: 20px;">
+        <h3>Assigned Surgeries</h3>
+
+        <table border="1" cellpadding="10">
+            <tr>
+                <th>Time</th>
+                <th>Surgery ID</th>
+                <th>Name</th>
+                <th>Room</th>
+            </tr>
+
+            {% for s in surgeries %}
+            <tr>
+                <td>{{ s.timeScheduled }}</td>
+                <td>{{ s.surgeryID }}</td>
+                <td>{{ s.surgeryName }}</td>
+                <td>{{ s.surgeryRoom }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% endif %}
+
+</div>
+
+</body>
+</html>

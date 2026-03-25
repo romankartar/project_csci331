@@ -704,7 +704,7 @@
     "name": "Logan Rodriguez",
     "role": "Anesthesiologist",
     "mode": "restricted",
-    "password": "Hospital.0101"
+    "password": "1"
   },
   {
     "staffID": "ST0102",
@@ -1053,560 +1053,560 @@
     "staffID": "ST0151",
     "name": "Lucas Martinez",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0152",
     "name": "Olivia Wilson",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0153",
     "name": "Lucas Martinez",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0154",
     "name": "Amelia Williams",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0155",
     "name": "Logan Thomas",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0156",
     "name": "Harper Davis",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0157",
     "name": "Olivia Johnson",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0158",
     "name": "Ava Smith",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0159",
     "name": "Liam Smith",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0160",
     "name": "Ethan Davis",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0161",
     "name": "Alexander Anderson",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0162",
     "name": "Elijah Taylor",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0163",
     "name": "Ethan Wilson",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0164",
     "name": "James Martin",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0165",
     "name": "Ethan Taylor",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0166",
     "name": "Noah Davis",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0167",
     "name": "Ava Williams",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0168",
     "name": "Lucas Williams",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0169",
     "name": "Evelyn Miller",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0170",
     "name": "Noah Davis",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0171",
     "name": "Sophia Thomas",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0172",
     "name": "Isabella Rodriguez",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0173",
     "name": "Sophia Wilson",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0174",
     "name": "Evelyn Jackson",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0175",
     "name": "Emma Miller",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0176",
     "name": "Amelia Smith",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0177",
     "name": "Olivia Jones",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0178",
     "name": "Liam Brown",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0179",
     "name": "Amelia Wilson",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0180",
     "name": "Logan Gonzalez",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0181",
     "name": "Amelia Jones",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0182",
     "name": "Alexander Lopez",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0183",
     "name": "Sophia Martinez",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0184",
     "name": "Mason Martinez",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0185",
     "name": "Elijah Anderson",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0186",
     "name": "Benjamin Wilson",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0187",
     "name": "Ethan Davis",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0188",
     "name": "Elijah Gonzalez",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0189",
     "name": "Amelia Williams",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0190",
     "name": "Mason Lopez",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0191",
     "name": "Mason Taylor",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0192",
     "name": "Elijah Williams",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0193",
     "name": "Amelia Miller",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0194",
     "name": "Logan Garcia",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0195",
     "name": "Mason Brown",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0196",
     "name": "Lucas Martin",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0197",
     "name": "Mason Garcia",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0198",
     "name": "Lucas Williams",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0199",
     "name": "Amelia Williams",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0200",
     "name": "Isabella Johnson",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0201",
     "name": "Emma Jones",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0202",
     "name": "Henry Davis",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0203",
     "name": "Liam Wilson",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0204",
     "name": "Benjamin Johnson",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0205",
     "name": "Liam Taylor",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0206",
     "name": "Noah Davis",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0207",
     "name": "Lucas Davis",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0208",
     "name": "Ethan Moore",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0209",
     "name": "Benjamin Martin",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0210",
     "name": "Elijah Martinez",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0211",
     "name": "Alexander Garcia",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0212",
     "name": "Lucas Johnson",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0213",
     "name": "Lucas Martinez",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0214",
     "name": "Emma Miller",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0215",
     "name": "Noah Martinez",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0216",
     "name": "Noah Garcia",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0217",
     "name": "Emma Wilson",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0218",
     "name": "Amelia Brown",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0219",
     "name": "Benjamin Rodriguez",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0220",
     "name": "Henry Williams",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0221",
     "name": "Henry Williams",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0222",
     "name": "Benjamin Davis",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0223",
     "name": "Sophia Wilson",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0224",
     "name": "Noah Jackson",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0225",
     "name": "Noah Jones",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0226",
     "name": "Logan Wilson",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0227",
     "name": "Sophia Brown",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0228",
     "name": "Mason Lopez",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0229",
     "name": "Alexander Jackson",
     "role": "Nurse",
-    "mode": "restricted",
+    "mode": "full",
     "password": "Hospital.1111"
   },
   {
     "staffID": "ST0230",
     "name": "Sophia Williams",
     "role": "Nurse",
-    "mode": "restricted",
-    "password": "Hospital.1111"
+    "mode": "full",
+    "password": "1"
   }
 ]

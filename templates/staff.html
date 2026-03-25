@@ -3,41 +3,114 @@
 <head>
     <title>Staff</title>
     <link rel="stylesheet" type="text/css" href="/static/styler.css">
-</head>        
-
+</head>
 <body>
+    <nav>
+        <ul>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/patients">Patients</a></li>
+            <li><a href="/surgeries">Surgeries</a></li>
+            <li><a href="/prescriptions">Prescriptions</a></li>
+            <li><a href="/staff">Staff</a></li>
+            <li><a href="/shift">Shift</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
 
-<nav>
-<ul>
-    <li><a href="/home">Home</a></li>
-    <li><a href="/patients">Patients</a></li>
-    <li><a href="/surgeries">Surgeries</a></li>
-    <li><a href="/prescriptions">Prescriptions</a></li>
-    <li><a href="/staff">Staff</a></li>
-</ul>
-</nav>
+    <h2>Staff Management</h2>
 
-<h2>Search Patient by Date of Birth</h2>
+    <form method="POST" action="/staff" style="display: flex; justify-content: center; gap: 10px; margin: 20px 0;">
+        <button type="submit" name="action" value="add">Add Staff</button>
+        <button type="submit" name="action" value="lookup">Look Up Staff</button>
+        <button type="submit" name="action" value="update">Update Staff</button>
+        <button type="submit" name="action" value="remove">Remove Staff</button>
+    </form>
 
-<form method="POST">
-    <label>Enter DOB:</label>
-    <input type="date" name="dob" required>
-    <button type="submit">Search</button>
-</form>
+    {% if message %}
+        <p class="flash-message {{ message_type }}">{{ message }}</p>
+    {% endif %}
 
-{% if patient %}
-    <h3>Patient Found:</h3>
-    <p><strong>ID:</strong> {{ patient.patientID }}</p>
-    <p><strong>Name:</strong> {{ patient.name }}</p>
-    <p><strong>Age:</strong> {{ patient.age }}</p>
-    <p><strong>Gender:</strong> {{ patient.gender }}</p>
-    <p><strong>Phone:</strong> {{ patient.phone }}</p>
-    <p><strong>Address:</strong> {{ patient.address }}</p>
-    <p><strong>Allergies:</strong> {{ patient.allergies }}</p>
-    <p><strong>Conditions:</strong> {{ patient.conditions }}</p>
-{% elif patient is not none %}
-    <p>No patient found with that DOB.</p>
-{% endif %}
+    <div class="container">
 
+        {% if staff %}
+        <div class="card">
+            <h3>Staff Info 👨‍⚕️</h3>
+            <p><strong>ID:</strong> {{ staff.staffID }}</p>
+            <p><strong>Name:</strong> {{ staff.name }}</p>
+            <p><strong>Role:</strong> {{ staff.role }}</p>
+            <p><strong>Mode:</strong> {{ staff.mode }}</p>
+        </div>
+        {% endif %}
+
+        {% if show_add_form %}
+        <div class="card">
+            <h3>Add New Staff 📝</h3>
+            <form method="POST" action="/add-staff">
+                <input type="text" name="name" placeholder="Name" required>
+
+                <select name="role" required>
+                    <option value="" disabled selected hidden>Select Role</option>
+                    <option value="Family Doctor">Family Doctor</option>
+                    <option value="Lead Surgeon">Lead Surgeon</option>
+                    <option value="Anesthesiologist">Anesthesiologist</option>
+                    <option value="Nurse">Nurse</option>
+                </select>
+
+                <input type="password" name="password" placeholder="Password" required>
+
+                <button type="submit">Add Staff</button>
+            </form>
+        </div>
+        {% endif %}
+
+        {% if show_lookup_form %}
+        <div class="card">
+            <h3>Lookup Staff 🔍</h3>
+            <form method="POST" action="/staff">
+                <input type="hidden" name="action" value="{{ 'update' if update_mode else ('remove' if remove_mode else 'lookup') }}">
+                <input type="text" name="search_value" placeholder="Enter ID or Name" required>
+
+                <button type="submit" name="search_type" value="id">By ID</button>
+                <button type="submit" name="search_type" value="name">By Name</button>
+            </form>
+        </div>
+        {% endif %}
+
+        {% if show_update_form %}
+        <div class="card">
+            <h3>Update Staff ✏️</h3>
+            <form method="POST" action="/update-staff">
+                <input type="hidden" name="staffID" value="{{ staff.staffID }}">
+
+                <input type="text" name="name" value="{{ staff.name }}" required>
+
+                <select name="role" required>
+                    <option value="Family Doctor" {% if staff.role == "Family Doctor" %}selected{% endif %}>Family Doctor</option>
+                    <option value="Lead Surgeon" {% if staff.role == "Lead Surgeon" %}selected{% endif %}>Lead Surgeon</option>
+                    <option value="Anesthesiologist" {% if staff.role == "Anesthesiologist" %}selected{% endif %}>Anesthesiologist</option>
+                    <option value="Nurse" {% if staff.role == "Nurse" %}selected{% endif %}>Nurse</option>
+                </select>
+
+                <input type="password" name="password" value="{{ staff.password }}" required>
+
+                <button type="submit">Update Staff</button>
+            </form>
+        </div>
+        {% endif %}
+
+        {% if show_remove_confirm %}
+        <div class="card">
+            <h3>Confirm Deletion ⚠️</h3>
+            <p>Are you sure you want to delete <strong>{{ staff.name }}</strong>?</p>
+
+            <form method="POST" action="/remove-staff">
+                <input type="hidden" name="staffID" value="{{ staff.staffID }}">
+                <button type="submit" name="confirm" value="yes">Yes</button>
+                <button type="submit" name="confirm" value="no">Cancel</button>
+            </form>
+        </div>
+        {% endif %}
+
+    </div>
 </body>
 </html>

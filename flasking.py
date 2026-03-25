@@ -1,7 +1,6 @@
 from datetime import datetime
-from models import Staff, Patient, Surgery, Prescription, db_session 
+from models import Staff, Patient, Surgery, Prescription, Shift, db_session 
 from flask import Flask, render_template, request, redirect, session
-from models import Staff, Patient, db_session  
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -13,6 +12,31 @@ def calculate_age(dob):
     today = datetime.today().date()
     return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
 
+def get_current_timestamp():
+    now = datetime.now()
+    return {
+        "date": now.strftime("%Y-%m-%d"),
+        "time": now.strftime("%H:%M")
+    }
+
+def get_most_recent_clock(shift):
+    times = []
+
+    def add(entry):
+        if entry:
+            times.append(f"{entry['date']} {entry['time']}")
+
+    add(shift.clockIn)
+    add(shift.lunchClockIn)
+    add(shift.lunchClockOut)
+    add(shift.clockOut)
+
+    if not times:
+        return "--"
+
+    return max(times).split(" ")[1]  # return only HH:MM
+
+
 def normalize_surgery_id(surgery_id: str):
     # Accepts: 0004, S0004, PR0004
     if surgery_id.startswith("PR"):
@@ -20,6 +44,80 @@ def normalize_surgery_id(surgery_id: str):
     if surgery_id.startswith("S"):
         return surgery_id[1:]
     return surgery_id
+
+def generate_staff_id():
+    last_staff = db_session.query(Staff).order_by(Staff.staffID.desc()).first()
+
+    if not last_staff:
+        return "ST0001"
+
+    last_num = int(last_staff.staffID.replace("ST", ""))
+    new_num = last_num + 1
+
+    return f"ST{new_num:04d}"
+
+def generate_surgery_id():
+    last = db_session.query(Surgery).order_by(Surgery.surgeryID.desc()).first()
+
+    if not last:
+        return "S0001"
+
+    last_num = int(last.surgeryID.replace("S", ""))
+    return f"S{last_num + 1:04d}"
+
+
+def normalize_surgery_id_input(sid):
+    if sid.startswith("S"):
+        return sid
+    return "S" + sid
+
+SURGERY_MAP = {
+    "Orthopedic Surgery": [
+        "Arthroscopy", "Orthopedics", "Hip replacement", "Hand surgery"
+    ],
+    "General Surgery": [
+        "Appendectomy", "Bariatric surgery", "Cholecystectomy",
+        "General Surgery", "Laparoscopy", "Inguinal hernia repair",
+        "Colorectal surgery", "Endoscopy"
+    ],
+    "Gynecology Surgery": [
+        "Caesarean section", "Hysterectomy", "Hysteroscopy"
+    ],
+    "Specialized surgeries": [
+        "Cataract surgery", "Plastic surgery", "Endocrine surgery"
+    ],
+    "Major Surgery": [
+        "Coronary artery bypass surgery", "Cardiothoracic surgery",
+        "Neurosurgery", "Vascular surgery", "Breast surgery"
+    ]
+}
+STAFF_GROUPS = {
+    "1": [
+        ["ST0051","ST0101","ST0151","ST0152"],
+        ["ST0052","ST0102","ST0153","ST0154"],
+        ["ST0053","ST0103","ST0155","ST0156"]
+    ],
+    "2": [
+        ["ST0054","ST0104","ST0157","ST0158"],
+        ["ST0055","ST0105","ST0159","ST0160"],
+        ["ST0056","ST0106","ST0161","ST0162"]
+    ],
+    "3": [
+        ["ST0057","ST0107","ST0163","ST0164"],
+        ["ST0058","ST0108","ST0165","ST0166"],
+        ["ST0059","ST0109","ST0167","ST0168"]
+    ],
+    "4": [
+        ["ST0060","ST0110","ST0169","ST0170"],
+        ["ST0061","ST0111","ST0171","ST0172"],
+        ["ST0062","ST0112","ST0173","ST0174"]
+    ],
+    "5": [
+        ["ST0063","ST0113","ST0175","ST0176"],
+        ["ST0064","ST0114","ST0177","ST0178"],
+        ["ST0065","ST0115","ST0179","ST0180"]
+    ]
+}
 
 # -------------------------
 # LOGIN PAGE
@@ -34,7 +132,10 @@ def login():
         staff = db_session.query(Staff).filter_by(staffID=staff_id).first()
 
         if staff and staff.password == password:
+            # SAVE  FOR THE HOME PAGE! 
             session["staffID"] = staff.staffID
+            session["user_name"] = staff.name
+            session["role"] = staff.role
             return redirect("/home")
         else:
             error = "Invalid Staff ID or Password"
@@ -206,15 +307,6 @@ def remove_patient():
 
     return render_template("patients.html", message="Deletion cancelled.", message_type="error")
 
-
-# -------------------------
-# OTHER PAGES
-# -------------------------
-@app.route("/surgeries")
-def surgeries():
-    if "staffID" not in session:
-        return redirect("/")
-    return render_template("surgeries.html")
 
 
 @app.route("/prescriptions", methods=["GET", "POST"])
@@ -439,16 +531,365 @@ def update_prescription():
         message_type="success"
     )
 
+@app.route("/add-staff", methods=["POST"])
+def add_staff():
+    data = request.form
 
+    name = data.get("name")
+    role = data.get("role")
+    password = data.get("password")
 
+    if not name or not role or not password:
+        return render_template("staff.html", show_add_form=True, message="All fields required.", message_type="error")
 
-@app.route("/staff")
-def staff():
+    staff_id = generate_staff_id()
+
+    # Mode logic
+    if role == "Nurse":
+        mode = "full"
+    else:
+        mode = "restricted"
+
+    new_staff = Staff(
+        staffID=staff_id,
+        name=name,
+        role=role,
+        mode=mode,
+        password=password
+    )
+
+    db_session.add(new_staff)
+    db_session.commit()
+
+    return render_template("staff.html", staff=new_staff, message="Staff added successfully.", message_type="success")
+
+@app.route("/staff", methods=["GET", "POST"])
+def staff_page():
     if "staffID" not in session:
         return redirect("/")
+
+    if request.method == "POST":
+        action = request.form.get("action")
+        search_value = request.form.get("search_value")
+        search_type = request.form.get("search_type")
+
+        if search_value and search_type:
+            if search_type == "id":
+                staff = db_session.query(Staff).filter_by(staffID=search_value).first()
+            else:
+                staff = db_session.query(Staff).filter(Staff.name.ilike(search_value)).first()
+
+            if staff:
+                if action == "update":
+                    return render_template("staff.html", staff=staff, show_update_form=True)
+                elif action == "remove":
+                    return render_template("staff.html", staff=staff, show_remove_confirm=True)
+                else:
+                    return render_template("staff.html", staff=staff)
+            else:
+                return render_template("staff.html", show_lookup_form=True, message="Staff not found.", message_type="error")
+
+        if action == "add":
+            return render_template("staff.html", show_add_form=True)
+
+        elif action == "lookup":
+            return render_template("staff.html", show_lookup_form=True)
+
+        elif action == "update":
+            return render_template("staff.html", show_lookup_form=True, update_mode=True)
+
+        elif action == "remove":
+            return render_template("staff.html", show_lookup_form=True, remove_mode=True)
+
     return render_template("staff.html")
 
+@app.route("/update-staff", methods=["POST"])
+def update_staff():
+    sid = request.form.get("staffID")
+    staff = db_session.query(Staff).filter_by(staffID=sid).first()
 
+    if not staff:
+        return render_template("staff.html", message="Staff not found.", message_type="error")
+
+    role = request.form["role"]
+
+    staff.name = request.form["name"]
+    staff.role = role
+    staff.password = request.form["password"]
+
+    # Mode rule
+    if role == "Nurse":
+        staff.mode = "full"
+    else:
+        staff.mode = "restricted"
+
+    db_session.commit()
+
+    return render_template("staff.html", staff=staff, message="Staff updated successfully.", message_type="success")
+
+@app.route("/remove-staff", methods=["POST"])
+def remove_staff():
+    sid = request.form.get("staffID")
+    confirm = request.form.get("confirm")
+
+    staff = db_session.query(Staff).filter_by(staffID=sid).first()
+
+    if confirm == "yes" and staff:
+        db_session.delete(staff)
+        db_session.commit()
+        return render_template("staff.html", message="Staff deleted successfully.", message_type="success")
+
+    return render_template("staff.html", message="Deletion cancelled.", message_type="error")
+
+
+@app.route("/surgeries", methods=["GET", "POST"])
+def surgeries():
+    if "staffID" not in session:
+        return redirect("/")
+
+    action = request.form.get("action")
+
+    if request.method == "POST":
+
+        search_value = request.form.get("search_value")
+
+        if search_value:
+            sid = normalize_surgery_id_input(search_value)
+
+            surgery = db_session.query(Surgery).filter_by(surgeryID=sid).first()
+
+            if surgery:
+                if action == "update":
+                    return render_template("surgeries.html", show_update_form=True, surgery=surgery, surgery_map=SURGERY_MAP)
+                elif action == "remove":
+                    return render_template("surgeries.html", show_remove_confirm=True, surgery=surgery, surgery_map=SURGERY_MAP)
+                else:
+                    return render_template("surgeries.html", surgery=surgery, surgery_map=SURGERY_MAP)
+            else:
+                return render_template("surgeries.html", show_lookup_form=True, message="No surgery found.", message_type="error", surgery_map=SURGERY_MAP)
+
+        if action == "add":
+            return render_template("surgeries.html", show_add_form=True, surgery_map=SURGERY_MAP)
+
+        elif action == "lookup":
+            return render_template("surgeries.html", show_lookup_form=True, surgery_map=SURGERY_MAP)
+
+        elif action == "update":
+            return render_template("surgeries.html", show_lookup_form=True, update_mode=True, surgery_map=SURGERY_MAP)
+
+        elif action == "remove":
+            return render_template("surgeries.html", show_lookup_form=True, remove_mode=True, surgery_map=SURGERY_MAP)
+
+    return render_template("surgeries.html", surgery_map=SURGERY_MAP)
+
+@app.route("/add-surgery", methods=["POST"])
+def add_surgery():
+    data = request.form
+
+    patient_id = data.get("patientID")
+    if not patient_id.startswith("P"):
+        patient_id = "P" + patient_id
+
+    patient = db_session.query(Patient).filter_by(patientID=patient_id).first()
+    if not patient:
+        return render_template("surgeries.html", show_add_form=True, message="Invalid Patient ID", message_type="error", surgery_map=SURGERY_MAP)
+
+    surgery_type = data.get("surgeryType")
+    surgery_name = data.get("surgeryName")
+
+    if surgery_name not in SURGERY_MAP.get(surgery_type, []):
+        return render_template("surgeries.html", show_add_form=True, message="Invalid surgery selection", message_type="error", surgery_map=SURGERY_MAP)
+
+    room = data.get("surgeryRoom")
+    group_index = int(data.get("staffGroup"))
+
+    staff_ids = STAFF_GROUPS[room][group_index]
+
+    new_surgery = Surgery(
+        surgeryID=generate_surgery_id(),
+        patientID=patient_id,
+        surgeryRoom=room,
+        staffIDs=staff_ids,
+        surgeryName=surgery_name,
+        surgeryType=surgery_type,
+        date=data.get("date"),
+        timeScheduled=data.get("timeScheduled"),
+        anesthesia=None,
+        status="Scheduled"
+    )
+
+    db_session.add(new_surgery)
+    db_session.commit()
+
+    return render_template("surgeries.html",surgery=new_surgery,message="Surgery added successfully.",message_type="success",surgery_map=SURGERY_MAP)
+
+@app.route("/update-surgery", methods=["POST"])
+def update_surgery():
+    sid = request.form.get("surgeryID")
+    surgery = db_session.query(Surgery).filter_by(surgeryID=sid).first()
+
+    if not surgery:
+        return render_template("surgeries.html",
+                               message="Surgery not found.",
+                               message_type="error",
+                               surgery_map=SURGERY_MAP)
+
+    # basic fields
+    patient_id = request.form.get("patientID")
+    if not patient_id.startswith("P"):
+        patient_id = "P" + patient_id
+
+    surgery.patientID = patient_id
+    surgery.surgeryRoom = request.form.get("surgeryRoom")
+    surgery.surgeryType = request.form.get("surgeryType")
+    surgery.surgeryName = request.form.get("surgeryName")
+    surgery.date = request.form.get("date")
+    surgery.timeScheduled = request.form.get("timeScheduled")
+    surgery.status = request.form.get("status")
+
+    surgery.anesthesia = {
+        "used": request.form.get("anesthesia_used") == "true",
+        "type": request.form.get("anesthesia_type") or None,
+        "dosage": request.form.get("anesthesia_dosage") or None
+    }
+    surgery.checkInDate = request.form.get("checkInDate") or None
+    surgery.checkInTime = request.form.get("checkInTime") or None
+    surgery.checkOutDate = request.form.get("checkOutDate") or None
+    surgery.checkOutTime = request.form.get("checkOutTime") or None
+
+    surgery.recoveryNotes = request.form.get("recoveryNotes") or None
+
+    db_session.commit()
+
+    return render_template("surgeries.html",surgery=surgery,message="Surgery updated successfully.",message_type="success",surgery_map=SURGERY_MAP)
+
+@app.route("/remove-surgery", methods=["POST"])
+def remove_surgery():
+    sid = normalize_surgery_id_input(request.form.get("surgeryID"))
+    confirm = request.form.get("confirm")
+
+    surgery = db_session.query(Surgery).filter_by(surgeryID=sid).first()
+
+    if confirm == "yes" and surgery:
+        db_session.delete(surgery)
+        db_session.commit()
+        return render_template("surgeries.html", message="Surgery deleted.", message_type="success",surgery_map=SURGERY_MAP)
+
+    return render_template("surgeries.html",message="Deletion cancelled.",message_type="error",surgery_map=SURGERY_MAP)
+
+
+@app.route("/shift", methods=["GET", "POST"])
+def shift():
+    if "staffID" not in session:
+        return redirect("/")
+
+    staff_id = session.get("staffID")
+
+    # Fixed test date as requested
+    target_date = "2026-04-12"
+
+    # Get the shift for this staff on that date
+    shift = db_session.query(Shift).filter_by(staffID=staff_id,date=target_date).first()
+
+    if not shift:
+        return render_template("shift.html", message="No shift found for this date.", message_type="error")
+
+    recent_clock = get_most_recent_clock(shift)
+
+    # Get surgeries assigned to this staff on that date
+    surgeries = db_session.query(Surgery).filter(
+        Surgery.date == target_date
+    ).all()
+
+    # Filter surgeries assigned to this staff (assuming staffIDs stored in JSON or list)
+    staff_surgeries = []
+    for surgery in surgeries:
+        if hasattr(surgery, "staffIDs") and staff_id in (surgery.staffIDs or []):
+            staff_surgeries.append(surgery)
+
+    # Sort surgeries by time
+    staff_surgeries.sort(key=lambda s: s.timeScheduled)
+
+    return render_template("shift.html",shift=shift,surgeries=staff_surgeries, recent_clock=recent_clock)
+
+@app.route("/clock-in", methods=["POST"])
+def clock_in():
+    if "staffID" not in session:
+        return redirect("/")
+
+    staff_id = session.get("staffID")
+    target_date = "2026-04-12"
+
+    shift = db_session.query(Shift).filter_by(
+        staffID=staff_id,
+        date=target_date
+    ).first()
+
+    if shift:
+        shift.clockIn = get_current_timestamp()
+        db_session.commit()
+
+    return redirect("/shift")
+
+
+@app.route("/lunch-in", methods=["POST"])
+def lunch_in():
+    if "staffID" not in session:
+        return redirect("/")
+
+    staff_id = session.get("staffID")
+    target_date = "2026-04-12"
+
+    shift = db_session.query(Shift).filter_by(
+        staffID=staff_id,
+        date=target_date
+    ).first()
+
+    if shift:
+        shift.lunchClockIn = get_current_timestamp()
+        db_session.commit()
+
+    return redirect("/shift")
+
+
+@app.route("/lunch-out", methods=["POST"])
+def lunch_out():
+    if "staffID" not in session:
+        return redirect("/")
+
+    staff_id = session.get("staffID")
+    target_date = "2026-04-12"
+
+    shift = db_session.query(Shift).filter_by(
+        staffID=staff_id,
+        date=target_date
+    ).first()
+
+    if shift:
+        shift.lunchClockOut = get_current_timestamp()
+        db_session.commit()
+
+    return redirect("/shift")
+
+
+@app.route("/clock-out", methods=["POST"])
+def clock_out():
+    if "staffID" not in session:
+        return redirect("/")
+
+    staff_id = session.get("staffID")
+    target_date = "2026-04-12"
+
+    shift = db_session.query(Shift).filter_by(
+        staffID=staff_id,
+        date=target_date
+    ).first()
+
+    if shift:
+        shift.clockOut = get_current_timestamp()
+        db_session.commit()
+
+    return redirect("/shift")
 
 # -------------------------
 # LOGOUT
