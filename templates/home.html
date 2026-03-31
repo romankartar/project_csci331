@@ -31,6 +31,13 @@
 <p>Welcome, {{ session['user_name'] }}! You are logged in as a <strong>{{ session['role'] }}</strong>.</p>
 <p>Viewing Schedule for: <strong>{{ display_date }}</strong> </p>
 
+<form method="GET" action="/home">
+    <label for="date">Select Date:</label>
+    <input type="date" name="date" value="{{ display_date }}">
+    <button type="submit">View</button>
+    <button type="submit" onclick="this.form.date.value='{{ current_date }}'">Today</button>
+</form>
+
 <section>
     <h2>Today's Surgical Schedule </h2>
     <table border="1" style="width:100%; border-collapse: collapse;">
@@ -48,7 +55,7 @@
         <tbody>
             {% for surgery in surgeries %}
             <!-- Logic: If time is past and not completed, apply the Misty Rose class! -->
-            <tr class="{{ 'overdue-flag' if surgery.status|lower != 'completed' and surgery.timeScheduled < current_time else '' }}">
+            <tr class="{{' overdue-flag' if surgery.status|lower != 'completed' and (surgery.date < current_date or(surgery.date == current_date and surgery.timeScheduled < current_time)) else ''}}">
                 <td>{{ surgery.date }}</td> <!-- Added this! -->
     				 <td>{{ surgery.timeScheduled }}</td>
    				 <td>{{ surgery.surgeryID }}</td>
@@ -59,7 +66,7 @@
                 <td>
                     {% if surgery.status|lower == 'completed' %}
                         <span style="color: green;">Completed</span>
-                    {% elif surgery.timeScheduled < current_time %}
+                    {% elif surgery.date < current_date or (surgery.date == current_date and surgery.timeScheduled < current_time) %}
                        <span style="color: red;">LATE</span>
                     {% else %}
                         <span style="color: blue;">Scheduled</span>

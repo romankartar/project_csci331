@@ -25,9 +25,8 @@
 
 <form method="POST" action="/surgeries" style="display:flex; gap:10px; justify-content:center; margin:20px 0;">
     <button type="submit" name="action" value="add">Add Surgery</button>
-    <button type="submit" name="action" value="lookup">Look Up Surgery</button>
-    <button type="submit" name="action" value="update">Update Surgery</button>
-    <button type="submit" name="action" value="remove">Remove Surgery</button>
+    <button type="submit" name="action" value="lookup">Look Up and Edit Surgery</button>
+
 </form>
 
 {% if message %}
@@ -35,6 +34,59 @@
 {% endif %}
 
 <div class="container">
+{% if show_edit_prompt %}
+<div class="card">
+    <h3>Do you want to update or cancel this surgery?</h3>
+
+    <form method="POST" action="/surgeries">
+        <input type="hidden" name="surgeryID" value="{{ surgery.surgeryID }}">
+
+        <button type="submit" name="action" value="confirm_edit">Update</button>
+        <button type="submit" name="action" value="confirm_remove">Cancel</button>
+        <button type="submit" name="action" value="cancel_edit">No</button>
+    </form>
+</div>
+{% endif %}
+
+{% if show_lookup_form %}
+<div class="card">
+    <h3>Lookup Surgery 🔍</h3>
+    <form method="POST" action="/surgeries">
+        <input type="hidden" name="action" value="{{ 'remove' if remove_mode else 'update' if update_mode else 'lookup' }}">
+        <input type="text" id="search_value" name="search_value" placeholder="Enter Surgery ID">
+        <input type="date" name="search_date">
+        <button type="submit">Search</button>
+    </form>
+</div>
+{% endif %}
+
+{% if surgery_list %}
+<div class="card">
+    <h3>Surgeries on {{ search_date }} 🏥</h3>
+
+    <table>
+        <tr>
+            <th>Time</th>
+            <th>Surgery ID</th>
+            <th>Name</th>
+            <th>Room</th>
+        </tr>
+
+        {% for s in surgery_list %}
+        <tr>
+            <td>{{ s.timeScheduled }}</td>
+            <td>
+                <a href="#" onclick="fillLookup('{{ s.surgeryID }}')">
+                    {{ s.surgeryID }}
+                </a>
+            </td>
+            <td>{{ s.surgeryName }}</td>
+            <td>{{ s.surgeryRoom }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endif %}
 
 {% if surgery %}
 <div class="card">
@@ -61,6 +113,7 @@
 </div>
 {% endif %}
 
+
 {% if show_add_form %}
 <div class="card">
     <h3>Add Surgery 📝</h3>
@@ -85,19 +138,7 @@
             <option>23:00</option><option>01:35</option><option>04:25</option>
         </select> 
 
-        <select name="staffGroup" required>
-            <option value="" disabled selected>Select Staff Team</option>
-            <option value="0">Team A</option>
-            <option value="1">Team B</option>
-            <option value="2">Team C</option>
-        </select>
-
-        <select name="surgeryType" id="surgeryType" required>
-            <option value="" disabled selected>Select Type</option>
-            {% for type in surgery_map.keys() %}
-                <option value="{{ type }}">{{ type }}</option>
-            {% endfor %}
-        </select>
+        <input type="text" id="surgeryType" placeholder="Surgery Type" readonly required>
         
         <select name="surgeryName" id="surgeryName" required>
             <option value="" disabled selected>Select Surgery</option>
@@ -109,16 +150,7 @@
 </div>
 {% endif %}
 
-{% if show_lookup_form %}
-<div class="card">
-    <h3>Lookup Surgery 🔍</h3>
-    <form method="POST" action="/surgeries">
-        <input type="hidden" name="action" value="{{ 'update' if update_mode else ('remove' if remove_mode else 'lookup') }}">
-        <input type="text" name="search_value" required>
-        <button type="submit">Search</button>
-    </form>
-</div>
-{% endif %}
+
 
 {% if show_update_form %}
 <div class="card">
@@ -138,18 +170,9 @@
             <option value="5" {% if surgery.surgeryRoom=="5" %}selected{% endif %}>Room 5</option>
         </select>
 
-        <select name="surgeryType">
-            {% for type in surgery_map.keys() %}
-                <option value="{{ type }}" {% if surgery.surgeryType==type %}selected{% endif %}>{{ type }}</option>
-            {% endfor %}
-        </select>
+        <input type="text" id="updateType" value="{{ surgery.surgeryType }}" readonly>
 
-        <select name="surgeryName">
-            {% for type,names in surgery_map.items() %}
-                {% for name in names %}
-                    <option value="{{ name }}" {% if surgery.surgeryName==name %}selected{% endif %}>{{ name }}</option>
-                {% endfor %}
-            {% endfor %}
+        <select name="surgeryName" id="updateName" required>
         </select>
 
         <input type="date" name="date" value="{{ surgery.date }}">
@@ -185,11 +208,11 @@
         {% if show_remove_confirm %}
         <div class="card">
             <h3>Confirm Deletion ⚠️</h3>
-            <p>Are you sure you want to delete <strong>{{ surgery.surgeryID }}</strong>?</p>
+            <p>Are you sure you want to cancel <strong>{{ surgery.surgeryID }}</strong>?</p>
             <form method="POST" action="/remove-surgery">
                 <input type="hidden" name="surgeryID" value="{{ surgery.surgeryID }}">
                 <button type="submit" name="confirm" value="yes">Yes</button>
-                <button type="submit" name="confirm" value="no">Cancel</button>
+                <button type="submit" name="confirm" value="no">No</button>
             </form>
         </div>
         {% endif %}
@@ -197,21 +220,26 @@
 </div>
 
 <script>
-    const surgeryMap = {{ surgery_map | tojson }};
-</script>
+    const roomMap = {{ surgery_map | tojson }};
 
-<script>
-    const typeSelect = document.getElementById("surgeryType");
+    const roomSelect = document.querySelector("select[name='surgeryRoom']");
+    const typeInput = document.getElementById("surgeryType");
     const nameSelect = document.getElementById("surgeryName");
 
-    if (typeSelect && nameSelect) {
-        typeSelect.addEventListener("change", function() {
-            const selectedType = this.value;
+    if (roomSelect && typeInput && nameSelect) {
 
+        roomSelect.addEventListener("change", function() {
+            const room = this.value;
+
+            // Reset name dropdown
             nameSelect.innerHTML = '<option value="" disabled selected>Select Surgery</option>';
 
-            if (surgeryMap[selectedType]) {
-                surgeryMap[selectedType].forEach(name => {
+            if (roomMap[room]) {
+                // AUTO FILL TYPE
+                typeInput.value = roomMap[room].type;
+
+                // FILL NAMES
+                roomMap[room].names.forEach(name => {
                     const option = document.createElement("option");
                     option.value = name;
                     option.textContent = name;
@@ -221,6 +249,53 @@
         });
     }
 </script>
+
+<script>
+    const updateRoom = document.querySelector("select[name='surgeryRoom']");
+    const updateType = document.getElementById("updateType");
+    const updateName = document.getElementById("updateName");
+
+    if (updateRoom && updateType && updateName) {
+
+        function populateUpdate(room, selectedName=null) {
+            updateName.innerHTML = '<option value="" disabled>Select Surgery</option>';
+
+            if (roomMap[room]) {
+                updateType.value = roomMap[room].type;
+
+                roomMap[room].names.forEach(name => {
+                    const option = document.createElement("option");
+                    option.value = name;
+                    option.textContent = name;
+
+                    if (name === selectedName) {
+                        option.selected = true;
+                    }
+
+                    updateName.appendChild(option);
+                });
+            }
+        }
+
+        // INITIAL LOAD (VERY IMPORTANT)
+        {% if surgery %}
+        populateUpdate(updateRoom.value, "{{ surgery.surgeryName | safe }}");
+        {% else %}
+        populateUpdate(updateRoom.value);
+        {% endif %}
+
+        // WHEN ROOM CHANGES
+        updateRoom.addEventListener("change", function() {
+            populateUpdate(this.value);
+        });
+    }
+</script>
+
+<script>
+    function fillLookup(id) {
+        document.getElementById("search_value").value = id;
+    }
+    </script>
 
 </body>
 </html>

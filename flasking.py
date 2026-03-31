@@ -68,52 +68,20 @@ def normalize_surgery_id_input(sid):
         return sid
     return "S" + sid
 
-SURGERY_MAP = {
-    "Orthopedic Surgery": [
-        "Arthroscopy", "Orthopedics", "Hip replacement", "Hand surgery"
-    ],
-    "General Surgery": [
-        "Appendectomy", "Bariatric surgery", "Cholecystectomy",
-        "General Surgery", "Laparoscopy", "Inguinal hernia repair",
-        "Colorectal surgery", "Endoscopy"
-    ],
-    "Gynecology Surgery": [
-        "Caesarean section", "Hysterectomy", "Hysteroscopy"
-    ],
-    "Specialized surgeries": [
-        "Cataract surgery", "Plastic surgery", "Endocrine surgery"
-    ],
-    "Major Surgery": [
-        "Coronary artery bypass surgery", "Cardiothoracic surgery",
-        "Neurosurgery", "Vascular surgery", "Breast surgery"
-    ]
+ROOM_SURGERY_MAP = {
+    "1": {"type": "Orthopedic Surgery", "names": ["Arthroscopy", "Orthopedics", "Hip replacement", "Hand surgery"]},
+    "2": {"type": "General Surgery", "names": ["Appendectomy", "Bariatric surgery", "Cholecystectomy", "General Surgery", "Laparoscopy", "Inguinal hernia repair", "Colorectal surgery", "Endoscopy"]},
+    "3": {"type": "Gynecology Surgery", "names": ["Caesarean section", "Hysterectomy", "Hysteroscopy"]},
+    "4": {"type": "Specialized surgeries", "names": ["Cataract surgery", "Plastic surgery", "Endocrine surgery"]},
+    "5": {"type": "Major Surgery", "names": ["Coronary artery bypass surgery", "Cardiothoracic surgery", "Neurosurgery", "Vascular surgery", "Breast surgery"]}
 }
+
 STAFF_GROUPS = {
-    "1": [
-        ["ST0051","ST0101","ST0151","ST0152"],
-        ["ST0052","ST0102","ST0153","ST0154"],
-        ["ST0053","ST0103","ST0155","ST0156"]
-    ],
-    "2": [
-        ["ST0054","ST0104","ST0157","ST0158"],
-        ["ST0055","ST0105","ST0159","ST0160"],
-        ["ST0056","ST0106","ST0161","ST0162"]
-    ],
-    "3": [
-        ["ST0057","ST0107","ST0163","ST0164"],
-        ["ST0058","ST0108","ST0165","ST0166"],
-        ["ST0059","ST0109","ST0167","ST0168"]
-    ],
-    "4": [
-        ["ST0060","ST0110","ST0169","ST0170"],
-        ["ST0061","ST0111","ST0171","ST0172"],
-        ["ST0062","ST0112","ST0173","ST0174"]
-    ],
-    "5": [
-        ["ST0063","ST0113","ST0175","ST0176"],
-        ["ST0064","ST0114","ST0177","ST0178"],
-        ["ST0065","ST0115","ST0179","ST0180"]
-    ]
+    "1": [["ST0051","ST0101","ST0151","ST0152"], ["ST0052","ST0102","ST0153","ST0154"], ["ST0053","ST0103","ST0155","ST0156"]],
+    "2": [["ST0054","ST0104","ST0157","ST0158"], ["ST0055","ST0105","ST0159","ST0160"], ["ST0056","ST0106","ST0161","ST0162"]],
+    "3": [["ST0057","ST0107","ST0163","ST0164"], ["ST0058","ST0108","ST0165","ST0166"], ["ST0059","ST0109","ST0167","ST0168"]],
+    "4": [["ST0060","ST0110","ST0169","ST0170"], ["ST0061","ST0111","ST0171","ST0172"], ["ST0062","ST0112","ST0173","ST0174"]],
+    "5": [["ST0063","ST0113","ST0175","ST0176"], ["ST0064","ST0114","ST0177","ST0178"], ["ST0065","ST0115","ST0179","ST0180"]]
 }
 
 # login
@@ -151,16 +119,14 @@ def home():
     timestamp = get_current_timestamp()
     # TEMP FIX: Use a date that actually has surgeries in your database!
     # Change this to "2026-04-07" since that's when your data starts
-    test_date = "2026-04-07" 
     current_time = timestamp["time"]
+    current_date = timestamp["date"]
+    selected_date = request.args.get("date") or current_date
 
     # Query surgeries for that specific test date
-    display_surgeries = db_session.query(Surgery).filter(Surgery.date == test_date).order_by(Surgery.timeScheduled).all()
+    display_surgeries = db_session.query(Surgery).filter(Surgery.date == selected_date).order_by(Surgery.timeScheduled).all()
             
-    return render_template("home.html", 
-                           surgeries = display_surgeries, 
-                           current_time = current_time,
-                           display_date = test_date)
+    return render_template("home.html", surgeries = display_surgeries, current_time = current_time,display_date = selected_date,current_date = current_date)
 
 
 
@@ -215,6 +181,7 @@ def patients():
 
     return render_template("patients.html")
 
+
 @app.route("/add-patient", methods=["POST"])
 def add_patient():
     data = request.form
@@ -226,7 +193,7 @@ def add_patient():
 
     existing = db_session.query(Patient).filter_by(patientID=data["patientID"]).first()
     if existing:
-        return render_template("patients.html", show_add_form=True, message="Patient ID already exists.", message_type="erro")
+        return render_template("patients.html", show_add_form=True, message="Patient ID already exists.", message_type="error")
 
     dob_obj = datetime.strptime(data["dob"], "%Y-%m-%d").date()
 
@@ -544,35 +511,49 @@ def surgeries():
     if request.method == "POST":
 
         search_value = request.form.get("search_value")
+        search_date = request.form.get("search_date")
+
+        if search_date:
+            surgeries = db_session.query(Surgery).filter(Surgery.date == search_date).order_by(Surgery.timeScheduled).all()
+            return render_template("surgeries.html",surgery_list=surgeries,search_date=search_date,show_lookup_form=True,surgery_map=ROOM_SURGERY_MAP)
 
         if search_value:
             sid = normalize_surgery_id_input(search_value)
 
             surgery = db_session.query(Surgery).filter_by(surgeryID=sid).first()
 
-            if surgery:
-                if action == "update":
-                    return render_template("surgeries.html", show_update_form=True, surgery=surgery, surgery_map=SURGERY_MAP)
-                elif action == "remove":
-                    return render_template("surgeries.html", show_remove_confirm=True, surgery=surgery, surgery_map=SURGERY_MAP)
-                else:
-                    return render_template("surgeries.html", surgery=surgery, surgery_map=SURGERY_MAP)
+            if not surgery:
+                return render_template("surgeries.html",show_lookup_form=True,message="No surgery found.",message_type="error",surgery_map=ROOM_SURGERY_MAP)
             else:
-                return render_template("surgeries.html", show_lookup_form=True, message="No surgery found.", message_type="error", surgery_map=SURGERY_MAP)
+                return render_template("surgeries.html",surgery=surgery,show_edit_prompt=True,surgery_map=ROOM_SURGERY_MAP)
 
         if action == "add":
-            return render_template("surgeries.html", show_add_form=True, surgery_map=SURGERY_MAP)
+            return render_template("surgeries.html", show_add_form=True, surgery_map=ROOM_SURGERY_MAP)
 
         elif action == "lookup":
-            return render_template("surgeries.html", show_lookup_form=True, surgery_map=SURGERY_MAP)
+            return render_template("surgeries.html", show_lookup_form=True, surgery_map=ROOM_SURGERY_MAP)
 
         elif action == "update":
-            return render_template("surgeries.html", show_lookup_form=True, update_mode=True, surgery_map=SURGERY_MAP)
+            return render_template("surgeries.html", show_lookup_form=True, update_mode=True, surgery_map=ROOM_SURGERY_MAP)
 
         elif action == "remove":
-            return render_template("surgeries.html", show_lookup_form=True, remove_mode=True, surgery_map=SURGERY_MAP)
+            return render_template("surgeries.html", show_lookup_form=True, remove_mode=True, surgery_map=ROOM_SURGERY_MAP)
+        
+        elif action == "confirm_edit":
+                sid = request.form.get("surgeryID")
+                surgery = db_session.query(Surgery).filter_by(surgeryID=sid).first()
+                return render_template("surgeries.html",surgery=surgery,show_update_form=True,surgery_map=ROOM_SURGERY_MAP)
+        
+        elif action == "cancel_edit":
+            return render_template("surgeries.html", show_lookup_form=True,surgery_map=ROOM_SURGERY_MAP)
 
-    return render_template("surgeries.html", surgery_map=SURGERY_MAP)
+        elif action == "confirm_remove":
+            sid = request.form.get("surgeryID")
+            surgery = db_session.query(Surgery).filter_by(surgeryID=sid).first()
+            return render_template("surgeries.html",surgery=surgery,show_remove_confirm=True,surgery_map=ROOM_SURGERY_MAP)
+    
+    all_surgeries = db_session.query(Surgery).all()
+    return render_template("surgeries.html",surgery_map=ROOM_SURGERY_MAP,all_surgeries=all_surgeries)
 
 @app.route("/add-surgery", methods=["POST"])
 def add_surgery():
@@ -584,16 +565,28 @@ def add_surgery():
 
     patient = db_session.query(Patient).filter_by(patientID=patient_id).first()
     if not patient:
-        return render_template("surgeries.html", show_add_form=True, message="Invalid Patient ID", message_type="error", surgery_map=SURGERY_MAP)
-
-    surgery_type = data.get("surgeryType")
-    surgery_name = data.get("surgeryName")
-
-    if surgery_name not in SURGERY_MAP.get(surgery_type, []):
-        return render_template("surgeries.html", show_add_form=True, message="Invalid surgery selection", message_type="error", surgery_map=SURGERY_MAP)
+        return render_template("surgeries.html", show_add_form=True, message="Invalid Patient ID", message_type="error", surgery_map=ROOM_SURGERY_MAP)
 
     room = data.get("surgeryRoom")
-    group_index = int(data.get("staffGroup"))
+    surgery_name = data.get("surgeryName")
+
+    room_data = ROOM_SURGERY_MAP.get(room)
+
+    if not room_data or surgery_name not in room_data["names"]:
+        return render_template("surgeries.html",show_add_form=True,message="Invalid surgery selection",message_type="error",surgery_map=ROOM_SURGERY_MAP)
+
+    surgery_type = room_data["type"]
+    room = data.get("surgeryRoom")
+    
+    time = data.get("timeScheduled")
+
+    # AUTO ASSIGN TEAM BASED ON TIME
+    if time in ["07:00", "09:35", "12:25"]:
+        group_index = 0  # Team A
+    elif time in ["15:00", "17:35", "20:25"]:
+        group_index = 1  # Team B
+    else:
+        group_index = 2  # Team C
 
     staff_ids = STAFF_GROUPS[room][group_index]
 
@@ -613,7 +606,7 @@ def add_surgery():
     db_session.add(new_surgery)
     db_session.commit()
 
-    return render_template("surgeries.html",surgery=new_surgery,message="Surgery added successfully.",message_type="success",surgery_map=SURGERY_MAP)
+    return render_template("surgeries.html",surgery=new_surgery,message="Surgery added successfully.",message_type="success",surgery_map=ROOM_SURGERY_MAP)
 
 @app.route("/update-surgery", methods=["POST"])
 def update_surgery():
@@ -624,16 +617,40 @@ def update_surgery():
         return render_template("surgeries.html",
                                message="Surgery not found.",
                                message_type="error",
-                               surgery_map=SURGERY_MAP)
+                               surgery_map=ROOM_SURGERY_MAP)
 
     patient_id = request.form.get("patientID")
     if not patient_id.startswith("P"):
         patient_id = "P" + patient_id
 
     surgery.patientID = patient_id
-    surgery.surgeryRoom = request.form.get("surgeryRoom")
-    surgery.surgeryType = request.form.get("surgeryType")
-    surgery.surgeryName = request.form.get("surgeryName")
+    room = request.form.get("surgeryRoom")
+    name = request.form.get("surgeryName")
+
+    room_data = ROOM_SURGERY_MAP.get(room)
+
+    if not room_data or name not in room_data["names"]:
+        return render_template(
+        "surgeries.html",
+        message="Invalid surgery selection",
+        message_type="error",
+        surgery_map=ROOM_SURGERY_MAP
+        )
+
+    surgery.surgeryRoom = room
+    surgery.surgeryName = name
+    time = request.form.get("timeScheduled")
+
+    # AUTO ASSIGN TEAM BASED ON TIME
+    if time in ["07:00", "09:35", "12:25"]:
+        group_index = 0
+    elif time in ["15:00", "17:35", "20:25"]:
+        group_index = 1
+    else:
+        group_index = 2
+
+    surgery.staffIDs = STAFF_GROUPS[room][group_index]
+    surgery.surgeryType = room_data["type"]
     surgery.date = request.form.get("date")
     surgery.timeScheduled = request.form.get("timeScheduled")
     surgery.status = request.form.get("status")
@@ -652,7 +669,7 @@ def update_surgery():
 
     db_session.commit()
 
-    return render_template("surgeries.html",surgery=surgery,message="Surgery updated successfully.",message_type="success",surgery_map=SURGERY_MAP)
+    return render_template("surgeries.html",surgery=surgery,message="Surgery updated successfully.",message_type="success",surgery_map=ROOM_SURGERY_MAP)
 
 @app.route("/remove-surgery", methods=["POST"])
 def remove_surgery():
@@ -664,9 +681,9 @@ def remove_surgery():
     if confirm == "yes" and surgery:
         db_session.delete(surgery)
         db_session.commit()
-        return render_template("surgeries.html", message="Surgery deleted.", message_type="success",surgery_map=SURGERY_MAP)
+        return render_template("surgeries.html", message="Surgery Cancelled.", message_type="success",surgery_map=ROOM_SURGERY_MAP)
 
-    return render_template("surgeries.html",message="Deletion cancelled.",message_type="error",surgery_map=SURGERY_MAP)
+    return render_template("surgeries.html",message="Deletion cancelled.",message_type="error",surgery_map=ROOM_SURGERY_MAP)
 
 
 @app.route("/shift", methods=["GET", "POST"])
@@ -771,4 +788,4 @@ def logout():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5501)
+    app.run(debug=True, port=5503)
