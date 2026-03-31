@@ -148,10 +148,11 @@ def home():
     user_id = session.get("staffID")
     user_role = session.get("role")
     
+    timestamp = get_current_timestamp()
     # TEMP FIX: Use a date that actually has surgeries in your database!
-    # Change this to "2026-03-31" since that's when your data starts
+    # Change this to "2026-04-07" since that's when your data starts
     test_date = "2026-04-07" 
-    current_time = "12:00" # A fake time to test the "Red Flag" logic!
+    current_time = timestamp["time"]
 
     # Query surgeries for that specific test date
     display_surgeries = db_session.query(Surgery).filter(Surgery.date == test_date).order_by(Surgery.timeScheduled).all()
@@ -675,7 +676,7 @@ def shift():
 
     staff_id = session.get("staffID")
 
-    target_date = "2026-04-12"
+    target_date = "2026-04-07"
 
     shift = db_session.query(Shift).filter_by(staffID=staff_id,date=target_date).first()
 
@@ -701,7 +702,7 @@ def clock_in():
         return redirect("/")
 
     staff_id = session.get("staffID")
-    target_date = "2026-04-12"
+    target_date = "2026-04-07"
 
     shift = db_session.query(Shift).filter_by(staffID=staff_id,date=target_date).first()
 
@@ -718,7 +719,7 @@ def lunch_in():
         return redirect("/")
 
     staff_id = session.get("staffID")
-    target_date = "2026-04-12" # for now but later will be current date 
+    target_date = "2026-04-07" # for now but later will be current date 
 
     shift = db_session.query(Shift).filter_by(staffID=staff_id,date=target_date).first()
 
@@ -735,7 +736,7 @@ def lunch_out():
         return redirect("/")
 
     staff_id = session.get("staffID")
-    target_date = "2026-04-12"
+    target_date = "2026-04-07"
 
     shift = db_session.query(Shift).filter_by(staffID=staff_id,date=target_date).first()
 
@@ -752,7 +753,7 @@ def clock_out():
         return redirect("/")
 
     staff_id = session.get("staffID")
-    target_date = "2026-04-12"
+    target_date = "2026-04-07"
 
     shift = db_session.query(Shift).filter_by(staffID=staff_id,date=target_date).first()
 

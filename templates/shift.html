@@ -62,12 +62,12 @@
             </p>
 
             <p>
-                <strong>Lunch In:</strong>
+                <strong>Lunch In 🥪:</strong>
                 {% if shift.lunchClockIn %}{{ shift.lunchClockIn.time }}{% else %}--{% endif %}
             </p>
 
             <p>
-                <strong>Lunch Out:</strong>
+                <strong>Lunch Out 🥪:</strong>
                 {% if shift.lunchClockOut %}{{ shift.lunchClockOut.time }}{% else %}--{% endif %}
             </p>
 
@@ -81,11 +81,11 @@
             </form>
 
             <form method="POST" action="/lunch-in" style="margin: 5px 0;">
-                <button type="submit">Lunch Start</button>
+                <button type="submit" class="lunchButton">Lunch Start 🥪</button>
             </form>
 
             <form method="POST" action="/lunch-out" style="margin: 5px 0;">
-                <button type="submit">Lunch End</button>
+                <button type="submit" class="lunchButton">Lunch End 🥪 </button>
             </form>
 
             <form method="POST" action="/clock-out" style="margin: 5px 0;">

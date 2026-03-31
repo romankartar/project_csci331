@@ -67,6 +67,8 @@
     <form method="POST" action="/add-surgery">
         <input type="text" name="patientID" placeholder="Patient ID (PXXXX)" required>
 
+        <input type="date" name="date" required>
+
         <select name="surgeryRoom" required>
             <option value="" disabled selected>Select Room</option>
             <option value="1">Room 1</option>
@@ -75,6 +77,13 @@
             <option value="4">Room 4</option>
             <option value="5">Room 5</option>
         </select>
+
+        <select name="timeScheduled" id="timeScheduled" required>
+            <option value="" disabled selected>Select Time</option>
+            <option>07:00</option><option>09:35</option><option>12:25</option>
+            <option>15:00</option><option>17:35</option><option>20:25</option>
+            <option>23:00</option><option>01:35</option><option>04:25</option>
+        </select> 
 
         <select name="staffGroup" required>
             <option value="" disabled selected>Select Staff Team</option>
@@ -94,13 +103,6 @@
             <option value="" disabled selected>Select Surgery</option>
         </select>
 
-        <input type="date" name="date" required>
-
-        <select name="timeScheduled" required>
-            <option>07:00</option><option>09:35</option><option>12:25</option>
-            <option>15:00</option><option>17:35</option><option>20:25</option>
-            <option>23:00</option><option>01:35</option><option>04:25</option>
-        </select>
 
         <button type="submit">Add Surgery</button>
     </form>
@@ -151,7 +153,7 @@
         </select>
 
         <input type="date" name="date" value="{{ surgery.date }}">
-        <input type="text" name="timeScheduled" value="{{ surgery.timeScheduled }}">
+        <input type="time" name="timeScheduled" value="{{ surgery.timeScheduled }}">
 
         <select name="anesthesia_used">
             <option value="true" {% if surgery.anesthesia and surgery.anesthesia.used %}selected{% endif %}>Yes</option>

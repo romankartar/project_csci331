@@ -101,3 +101,18 @@ h2 {
     text-align: center;
     color: green;
 }
+
+.lunchButton {
+    background-color: plum;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.lunchButton:hover {
+    background-color: rgb(185, 45, 185);
+}
