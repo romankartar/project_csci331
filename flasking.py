@@ -117,8 +117,7 @@ def home():
     user_role = session.get("role")
     
     timestamp = get_current_timestamp()
-    # TEMP FIX: Use a date that actually has surgeries in your database!
-    # Change this to "2026-04-07" since that's when your data starts
+
     current_time = timestamp["time"]
     current_date = timestamp["date"]
     selected_date = request.args.get("date") or current_date
@@ -580,13 +579,13 @@ def add_surgery():
     
     time = data.get("timeScheduled")
 
-    # AUTO ASSIGN TEAM BASED ON TIME
+
     if time in ["07:00", "09:35", "12:25"]:
-        group_index = 0  # Team A
+        group_index = 0  
     elif time in ["15:00", "17:35", "20:25"]:
-        group_index = 1  # Team B
+        group_index = 1  
     else:
-        group_index = 2  # Team C
+        group_index = 2 
 
     staff_ids = STAFF_GROUPS[room][group_index]
 
@@ -641,7 +640,6 @@ def update_surgery():
     surgery.surgeryName = name
     time = request.form.get("timeScheduled")
 
-    # AUTO ASSIGN TEAM BASED ON TIME
     if time in ["07:00", "09:35", "12:25"]:
         group_index = 0
     elif time in ["15:00", "17:35", "20:25"]:
@@ -693,7 +691,8 @@ def shift():
 
     staff_id = session.get("staffID")
 
-    target_date = "2026-04-07"
+    timestamp = get_current_timestamp()
+    target_date = timestamp["date"]
 
     shift = db_session.query(Shift).filter_by(staffID=staff_id,date=target_date).first()
 
@@ -718,8 +717,9 @@ def clock_in():
     if "staffID" not in session:
         return redirect("/")
 
+    timestamp = get_current_timestamp()
     staff_id = session.get("staffID")
-    target_date = "2026-04-07"
+    target_date = timestamp["date"]
 
     shift = db_session.query(Shift).filter_by(staffID=staff_id,date=target_date).first()
 
@@ -735,8 +735,9 @@ def lunch_in():
     if "staffID" not in session:
         return redirect("/")
 
+    timestamp = get_current_timestamp()
     staff_id = session.get("staffID")
-    target_date = "2026-04-07" # for now but later will be current date 
+    target_date = timestamp["date"]
 
     shift = db_session.query(Shift).filter_by(staffID=staff_id,date=target_date).first()
 
@@ -751,9 +752,10 @@ def lunch_in():
 def lunch_out():
     if "staffID" not in session:
         return redirect("/")
-
+    
+    timestamp = get_current_timestamp()
     staff_id = session.get("staffID")
-    target_date = "2026-04-07"
+    target_date = timestamp["date"]
 
     shift = db_session.query(Shift).filter_by(staffID=staff_id,date=target_date).first()
 
@@ -768,9 +770,10 @@ def lunch_out():
 def clock_out():
     if "staffID" not in session:
         return redirect("/")
-
+    
+    timestamp = get_current_timestamp()
     staff_id = session.get("staffID")
-    target_date = "2026-04-07"
+    target_date = timestamp["date"]
 
     shift = db_session.query(Shift).filter_by(staffID=staff_id,date=target_date).first()
 
@@ -788,4 +791,5 @@ def logout():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5503)
+    app.run(debug=True, port=5501)
+
