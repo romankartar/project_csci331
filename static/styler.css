@@ -4,6 +4,11 @@
     --deep-rose: #d81b60;
     --alert-red: #ffe4e1;
     --white: #ffffff;
+    
+    /* New Blue colour 💎 */
+    --primary-blue: #23869eff; 
+    --soft-blue: #e0f2f1;
+    --deep-blue: #1a6577;
 }
 
 body {
@@ -11,9 +16,10 @@ body {
     background-color: #fff9fb;
     margin: 0;
     color: #333;
+    transition: background-color 0.3s ease;
 }
 
-/* Navigation 🎀 */
+/* --- Navigation 🎀 --- */
 nav {
     background-color: var(--white);
     padding: 15px 30px;
@@ -37,7 +43,7 @@ nav ul li a {
 
 nav ul li a:hover { color: var(--primary-pink); }
 
-/* Containers & Cards */
+/* --- Containers & Cards --- */
 .container { padding: 40px; max-width: 1100px; margin: auto; }
 
 .card {
@@ -49,7 +55,7 @@ nav ul li a:hover { color: var(--primary-pink); }
     border: 1px solid var(--soft-pink);
 }
 
-/* Tables  */
+/* --- Tables --- */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -59,7 +65,7 @@ table {
 th { background-color: var(--primary-pink); color: white; padding: 12px; }
 td { padding: 12px; border-bottom: 1px solid var(--soft-pink); text-align: center; }
 
-/* Buttons & Forms  */
+/* --- Buttons & Forms --- */
 button, .btn {
     background-color: var(--primary-pink);
     color: white;
@@ -80,28 +86,14 @@ input, select {
     margin: 5px 0;
 }
 
+/* --- Status & Alerts 🚨 --- */
 .overdue-flag { background-color: var(--alert-red) !important; }
 
-h2 {
-    text-align: center;
-    margin-top: 20px;
-}
+.flash-message { font-weight: bold; margin-bottom: 5px; }
+.flash-message.error { color: red; padding-left: 50px; }
+.flash-message.success { text-align: center; color: green; }
 
-.flash-message {
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.flash-message.error {
-    color: red;
-    padding-left: 50px;
-}
-
-.flash-message.success {
-    text-align: center;
-    color: green;
-}
-
+/* --- Special Buttons --- */
 .lunchButton {
     background-color: plum;
     color: white;
@@ -113,6 +105,48 @@ h2 {
     transition: 0.3s;
 }
 
-.lunchButton:hover {
-    background-color: rgb(185, 45, 185);
+.lunchButton:hover { background-color: rgb(185, 45, 185); }
+
+/* =========================================
+   NEW: Professional Blue Theme Overrides 💎
+   (Only applies when <body class="blue-theme">)
+   ========================================= */
+
+.blue-theme { background-color: #f0f7f9; } /* Light blue bg */
+
+.blue-theme nav { box-shadow: 0 2px 10px rgba(35, 134, 158, 0.2); }
+.blue-theme nav ul li a { color: var(--primary-blue); }
+.blue-theme nav ul li a:hover { color: var(--deep-blue); }
+
+.blue-theme th { background-color: var(--primary-blue); }
+.blue-theme button, .blue-theme .btn { background-color: var(--primary-blue); }
+.blue-theme button:hover { background-color: var(--deep-blue); }
+
+.blue-theme .card { border: 1px solid var(--soft-blue); }
+
+/* Keep overdue flag pink for high visibility! */
+.blue-theme .overdue-flag { 
+    background-color: var(--alert-red) !important; 
+    border-left: 5px solid var(--primary-pink);
 }
+/* --- Expandable Staff Details 🔍 --- */
+.staff-details {
+    display: none; /* Hidden by default */
+    padding: 15px;
+    background-color: #fff0f5; /* Light pink background for the details */
+    border-radius: 10px;
+    margin-top: 10px;
+    border-left: 4px solid var(--primary-pink);
+}
+
+.staff-name-link {
+    color: var(--deep-rose);
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.staff-name-link:hover {
+    color: var(--primary-pink);
+}
+h2 { text-align: center; margin-top: 20px; }

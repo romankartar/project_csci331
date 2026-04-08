@@ -557,7 +557,7 @@ def surgeries():
 @app.route("/add-surgery", methods=["POST"])
 def add_surgery():
 
-    if session.get('role') not in ['Lead Surgeon', 'Admin', 'Nurse']:
+    if session.get('role') not in ['Lead Surgeon', 'Admin']:
         return render_template(
             "surgeries.html",
             message="Unauthorized: Only Surgeons and Admins can schedule surgeries.",

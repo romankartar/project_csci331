@@ -4,7 +4,7 @@
     <title>Patients</title>
     <link rel="stylesheet" type="text/css" href="/static/styler.css">
 </head>
-<body>
+<body class="blue-theme">
     <nav>
         <ul>
             <li><a href="/home">Home</a></li>
@@ -20,11 +20,20 @@
     <h2>Patient Management</h2>
 
     <form method="POST" action="/patients" style="display: flex; justify-content: center; gap: 10px; margin: 20px 0;">
+    <!-- Everyone can Look Up -->
+    <button type="submit" name="action" value="lookup">Look Up Patient</button>
+
+    <!-- 🛑 RESTRICTION: Only Doctors and Nurses can Add or Update -->
+    {% if session['role'] in ['Family Doctor', 'Lead Surgeon', 'Nurse', 'Admin'] %}
         <button type="submit" name="action" value="add">Add Patient</button>
-        <button type="submit" name="action" value="lookup">Look Up Patient</button>
         <button type="submit" name="action" value="update">Update Patient</button>
+    {% endif %}
+
+    <!-- 🛑 RESTRICTION: ONLY Admin can Remove -->
+    {% if session['role'] == 'Admin' %}
         <button type="submit" name="action" value="remove">Remove Patient</button>
-    </form>
+    {% endif %}
+</form>
 
     {% if message %}
         <p class="flash-message {{ message_type }}">{{ message }}</p>
